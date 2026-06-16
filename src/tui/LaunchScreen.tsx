@@ -1,0 +1,205 @@
+import React, { useState, useEffect } from 'react';
+import { Box, Text } from 'ink';
+import Spinner from 'ink-spinner';
+import type { ImageConfig } from '../types/image.js';
+import { detectDockerState, pullImage, runContainer, startContainer, getDockerClient } from '../lib/docker.js';
+import { findContainerBySlug, getContainerName, getSlugFromTag } from '../lib/containers.js';
+import { attachToContainer } from '../commands/connect.js';
+import type { RunContainerOpts } from '../types/container.js';
+
+type StepState = 'pending' | 'active' | 'complete' | 'skipped' | 'error';
+
+interface Step {
+  label: string;
+  state: StepState;
+  note?: string;
+}
+
+interface LaunchScreenProps {
+  image: ImageConfig;
+  onComplete: () => void;
+  onError: (error: Error) => void;
+}
+
+const STEP_LABELS = [
+  'Checking Docker',
+  'Installing Docker Engine',
+  'Pulling image',
+  'Starting container',
+  'Setting up workspace',
+  'Connecting',
+];
+
+function initialSteps(): Step[] {
+  return STEP_LABELS.map(label => ({ label, state: 'pending' as StepState }));
+}
+
+function StepRow({ step }: { step: Step }): JSX.Element {
+  const icon =
+    step.state === 'complete' ? <Text color="#00ED64">✓ </Text> :
+    step.state === 'active'   ? <Text color="#00ED64"><Spinner type="dots" /> </Text> :
+    step.state === 'skipped'  ? <Text dimColor>– </Text> :
+    step.state === 'error'    ? <Text color="red">✗ </Text> :
+                                <Text>  </Text>;
+
+  const label =
+    step.state === 'complete' ? <Text color="#00ED64">{step.label}</Text> :
+    step.state === 'active'   ? <Text>{step.label}</Text> :
+    step.state === 'skipped'  ? <Text dimColor>{step.label}</Text> :
+    step.state === 'error'    ? <Text color="red">{step.label}</Text> :
+                                <Text dimColor>{step.label}</Text>;
+
+  return (
+    <Box flexDirection="column">
+      <Box>
+        <Box width={3}>{icon}</Box>
+        {label}
+      </Box>
+      {step.note && step.state !== 'error' && (
+        <Box paddingLeft={3}>
+          <Text dimColor>{step.note}</Text>
+        </Box>
+      )}
+      {step.note && step.state === 'error' && (
+        <Box paddingLeft={3}>
+          <Text color="red">{step.note}</Text>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps): JSX.Element {
+  const [steps, setSteps] = useState<Step[]>(initialSteps);
+
+  function updateStep(idx: number, state: StepState, note?: string): void {
+    setSteps(prev => prev.map((s, i) => i === idx ? { ...s, state, note } : s));
+  }
+
+  useEffect(() => {
+    let alive = true;
+
+    async function run(): Promise<void> {
+      const slug = getSlugFromTag(image.tag);
+      const containerName = getContainerName(slug);
+
+      // Step 1: Check Docker
+      updateStep(0, 'active');
+      let dockerState: 'running' | 'not-running' | 'not-installed';
+      try {
+        dockerState = await detectDockerState();
+        updateStep(0, 'complete');
+      } catch (err) {
+        updateStep(0, 'error', (err as Error).message);
+        onError(err as Error);
+        return;
+      }
+
+      // Step 2: Install Docker Engine
+      if (dockerState === 'running') {
+        updateStep(1, 'skipped');
+      } else {
+        updateStep(1, 'active');
+        updateStep(1, 'error', 'Docker is not running. Run `mongo-docker setup` to install it.');
+        onError(new Error('Docker is not running'));
+        return;
+      }
+
+      // Step 3: Pull image
+      updateStep(2, 'active');
+      let pullNote = '';
+      try {
+        await pullImage(image.tag, (msg) => { pullNote = msg; });
+        updateStep(2, 'complete', pullNote || undefined);
+      } catch (err) {
+        updateStep(2, 'error', (err as Error).message);
+        onError(err as Error);
+        return;
+      }
+
+      // Step 4: Start container
+      updateStep(3, 'active');
+      let skipWorkspace = false;
+      try {
+        const existing = await findContainerBySlug(slug);
+        if (existing?.status === 'running') {
+          updateStep(3, 'skipped');
+          updateStep(4, 'skipped');
+          skipWorkspace = true;
+        } else {
+          if (existing) {
+            await startContainer(containerName);
+          } else {
+            const opts: RunContainerOpts = {
+              tag: image.tag,
+              name: containerName,
+              slug,
+              detach: true,
+            };
+            await runContainer(opts);
+          }
+          const docker = getDockerClient();
+          const info = await docker.getContainer(containerName).inspect();
+          if (!info.State.Running) {
+            updateStep(3, 'error', `Container exited immediately. Run \`docker logs ${containerName}\` to see what happened.`);
+            onError(new Error('Container exited immediately after start'));
+            return;
+          }
+          updateStep(3, 'complete');
+        }
+      } catch (err) {
+        updateStep(3, 'error', (err as Error).message);
+        onError(err as Error);
+        return;
+      }
+
+      // Step 5: Setup workspace
+      if (!skipWorkspace) {
+        updateStep(4, 'active');
+        try {
+          const docker = getDockerClient();
+          const container = docker.getContainer(containerName);
+          const exec = await container.exec({ Cmd: ['mkdir', '-p', '/home/mongo/demo'], AttachStdout: true, AttachStderr: true });
+          await exec.start({});
+          updateStep(4, 'complete');
+        } catch (err) {
+          updateStep(4, 'error', `Container stopped unexpectedly. Run \`docker logs ${containerName}\` for details.`);
+          onError(err as Error);
+          return;
+        }
+      }
+
+      // Step 6: Connect
+      updateStep(5, 'active');
+      try {
+        await attachToContainer(containerName);
+        updateStep(5, 'complete');
+        if (alive) onComplete();
+      } catch (err) {
+        updateStep(5, 'error', (err as Error).message);
+        onError(err as Error);
+      }
+    }
+
+    run().catch(err => {
+      if (alive) onError(err as Error);
+    });
+
+    return () => { alive = false; };
+  }, []);
+
+  const slug = getSlugFromTag(image.tag);
+
+  return (
+    <Box flexDirection="column" paddingY={1}>
+      <Box justifyContent="center">
+        <Text bold>🍃  Launching {image.description || slug}</Text>
+      </Box>
+      <Box marginTop={1} flexDirection="column" paddingLeft={8}>
+        {steps.map((step, i) => (
+          <StepRow key={i} step={step} />
+        ))}
+      </Box>
+    </Box>
+  );
+}

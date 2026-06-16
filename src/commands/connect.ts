@@ -47,6 +47,10 @@ async function attachExisting(containerId: string): Promise<void> {
   process.stdin.setRawMode?.(false);
 }
 
+export async function attachToContainer(nameOrId: string): Promise<void> {
+  await attachExisting(nameOrId);
+}
+
 export async function connectCommand(
   imageArg: string | undefined,
   opts: ConnectOpts

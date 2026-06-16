@@ -4,7 +4,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import type { RunContainerOpts } from '../types/container.js';
 
 export type DockerState = 'running' | 'not-running' | 'not-installed';
-export type DockerImage = { id: string; repoTags: string[] };
+export type DockerImage = { id: string; repoTags: string[]; size?: number };
 
 let _client: Dockerode | null = null;
 
@@ -169,7 +169,7 @@ export async function listLocalImages(filter?: string): Promise<DockerImage[]> {
   const docker = getDockerClient();
   const filters = filter ? JSON.stringify({ reference: [filter] }) : undefined;
   const images = await docker.listImages({ filters });
-  return images.map(img => ({ id: img.Id, repoTags: img.RepoTags ?? [] }));
+  return images.map(img => ({ id: img.Id, repoTags: img.RepoTags ?? [], size: img.Size }));
 }
 
 export async function inspectContainer(nameOrId: string): Promise<Dockerode.ContainerInspectInfo> {
