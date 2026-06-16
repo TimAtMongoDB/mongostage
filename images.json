@@ -1,0 +1,61 @@
+{
+  "components": {
+    "base": { "label": "base", "description": "Ubuntu 24.04 LTS", "order": 0 },
+    "server": { "label": "server", "description": "MongoDB Community Server 8.0", "order": 1 },
+    "shell": { "label": "shell", "description": "mongosh + import/export/dump", "order": 2 },
+    "node": { "label": "node", "description": "Node.js 22 LTS + Git", "order": 3 },
+    "python": { "label": "python", "description": "Python 3.12 + pip + Git", "order": 4 },
+    "claude": { "label": "claude", "description": "Claude Code CLI", "order": 5 },
+    "grok": { "label": "grok", "description": "Grok Build CLI", "order": 6 }
+  },
+  "images": [
+    {
+      "tag": "timatmongodb/mongo-docker:base",
+      "components": ["base"],
+      "description": "Ubuntu 24.04 LTS with MongoDB-branded terminal environment",
+      "category": "base"
+    },
+    {
+      "tag": "timatmongodb/mongo-docker:shell",
+      "components": ["base", "shell"],
+      "description": "Ubuntu 24.04 with mongosh, mongoimport, mongoexport, and mongodump",
+      "category": "shell"
+    },
+    {
+      "tag": "timatmongodb/mongo-docker:server-shell",
+      "components": ["base", "server", "shell"],
+      "description": "MongoDB Community Server 8.0 with full shell tooling",
+      "category": "server"
+    },
+    {
+      "tag": "timatmongodb/mongo-docker:node-shell",
+      "components": ["base", "shell", "node"],
+      "description": "Node.js 22 LTS with mongosh and shell tools",
+      "category": "runtime"
+    },
+    {
+      "tag": "timatmongodb/mongo-docker:node-shell-claude",
+      "components": ["base", "shell", "node", "claude"],
+      "description": "Node.js 22 LTS with mongosh and Claude Code CLI",
+      "category": "ai"
+    },
+    {
+      "tag": "timatmongodb/mongo-docker:python-shell",
+      "components": ["base", "shell", "python"],
+      "description": "Python 3.12 with mongosh and shell tools",
+      "category": "runtime"
+    },
+    {
+      "tag": "timatmongodb/mongo-docker:python-shell-claude",
+      "components": ["base", "shell", "python", "claude"],
+      "description": "Python 3.12 with mongosh and Claude Code CLI",
+      "category": "ai"
+    },
+    {
+      "tag": "timatmongodb/mongo-docker:node-shell-grok",
+      "components": ["base", "shell", "node", "grok"],
+      "description": "Node.js 22 LTS with mongosh and Grok Build CLI",
+      "category": "ai"
+    }
+  ]
+}
