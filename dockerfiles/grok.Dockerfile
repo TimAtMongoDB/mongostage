@@ -3,7 +3,5 @@
 # FROM resolved by build command - only valid on node-* images
 
 USER root
-RUN npm install -g @xai-org/grok-build 2>/dev/null || \
-    npm install -g grok-build 2>/dev/null || \
-    echo "Warning: Grok CLI package name not yet confirmed - verify package name before build"
+RUN npm install -g @xai-org/grok-build || npm install -g grok-build
 USER mongo

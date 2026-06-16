@@ -12,14 +12,9 @@ const PACKAGE_ROOT = join(__dirname, '../../');
 const PACKAGE_JSON_PATH = join(PACKAGE_ROOT, 'package.json');
 const REGISTRY_URL = 'https://npm.pkg.github.com';
 
-type VersionBumpType = 'patch' | 'minor' | 'major' | 'custom';
+import { PreflightError } from '../lib/errors.js';
 
-class PreflightError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'PreflightError';
-  }
-}
+type VersionBumpType = 'patch' | 'minor' | 'major' | 'custom';
 
 function bumpVersion(version: string, type: 'patch' | 'minor' | 'major'): string {
   const parts = version.split('.').map(Number);
@@ -34,11 +29,13 @@ function isValidSemver(version: string): boolean {
 }
 
 function readPackageJson(): { name: string; version: string; [key: string]: unknown } {
-  return JSON.parse(readFileSync(PACKAGE_JSON_PATH, 'utf8')) as {
-    name: string;
-    version: string;
-    [key: string]: unknown;
-  };
+  const raw: unknown = JSON.parse(readFileSync(PACKAGE_JSON_PATH, 'utf8'));
+  if (typeof raw !== 'object' || raw === null) throw new Error('package.json is not an object');
+  const pkg = raw as Record<string, unknown>;
+  if (typeof pkg['name'] !== 'string' || typeof pkg['version'] !== 'string') {
+    throw new Error('package.json is missing required "name" or "version" fields');
+  }
+  return pkg as { name: string; version: string; [key: string]: unknown };
 }
 
 function writeVersion(newVersion: string): void {

@@ -3,17 +3,16 @@ import { Box, Text } from 'ink';
 
 export type ImageFilter = 'all' | 'base' | 'runtime' | 'ai' | 'server';
 
-const FILTER_TABS: Array<{ key: ImageFilter; label: string }> = [
+const FILTER_TABS: ReadonlyArray<{ key: ImageFilter; label: string }> = Object.freeze([
   { key: 'all', label: 'All' },
   { key: 'base', label: 'Base' },
   { key: 'runtime', label: 'Runtime' },
   { key: 'ai', label: 'AI' },
   { key: 'server', label: 'Server' },
-];
+]);
 
 interface FilterBarProps {
   activeFilter: ImageFilter;
-  onFilterChange: (filter: ImageFilter) => void;
 }
 
 export function FilterBar({ activeFilter }: FilterBarProps): JSX.Element {

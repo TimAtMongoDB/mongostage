@@ -17,6 +17,7 @@ export function detectPlatform(): Platform {
 
   if (process.platform === 'win32') return 'windows-native';
 
+  console.warn(`Warning: unknown platform "${process.platform}" — defaulting to linux`);
   return 'linux';
 }
 

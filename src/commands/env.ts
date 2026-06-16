@@ -6,6 +6,22 @@ import { createInterface } from 'node:readline/promises';
 const ENV_DIR = join(homedir(), '.mongo-docker');
 const ENV_FILE = join(ENV_DIR, '.env');
 
+const KEY_PATTERN = /^[A-Z_][A-Z0-9_]*$/i;
+
+function validateKey(key: string): void {
+  if (!KEY_PATTERN.test(key)) {
+    console.error(`Invalid key "${key}". Keys must match /^[A-Z_][A-Z0-9_]*$/i`);
+    process.exit(1);
+  }
+}
+
+function validateValue(value: string): void {
+  if (value.includes('\n') || value.includes('\r')) {
+    console.error('Value must not contain newline characters.');
+    process.exit(1);
+  }
+}
+
 function ensureEnvDir(): void {
   if (!existsSync(ENV_DIR)) {
     mkdirSync(ENV_DIR, { recursive: true });
@@ -34,6 +50,10 @@ export async function envSetCommand(entry: string): Promise<void> {
 
   const key = entry.slice(0, eqIndex);
   const value = entry.slice(eqIndex + 1);
+
+  validateKey(key);
+  validateValue(value);
+
   const lines = readEnvLines();
   const keyPrefix = `${key}=`;
   const existingIdx = lines.findIndex(l => l.startsWith(keyPrefix));
@@ -70,6 +90,8 @@ export async function envListCommand(): Promise<void> {
 }
 
 export async function envRemoveCommand(key: string): Promise<void> {
+  validateKey(key);
+
   const lines = readEnvLines();
   const keyPrefix = `${key}=`;
   const idx = lines.findIndex(l => l.startsWith(keyPrefix));

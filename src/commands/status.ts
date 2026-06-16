@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import { detectDockerState, getDockerClient } from '../lib/docker.js';
 import { listManagedContainers } from '../lib/containers.js';
 import { getCliConfig } from '../lib/config.js';
+import { formatBytes } from '../lib/format.js';
 
 function timeAgo(isoDate: string): string {
   const diff = Date.now() - new Date(isoDate).getTime();
@@ -11,12 +12,6 @@ function timeAgo(isoDate: string): string {
   if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
   const days = Math.floor(hours / 24);
   return `${days} day${days !== 1 ? 's' : ''} ago`;
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)}GB`;
-  if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(0)}MB`;
-  return `${Math.round(bytes / 1e3)}KB`;
 }
 
 export async function statusCommand(): Promise<void> {
@@ -55,7 +50,7 @@ export async function statusCommand(): Promise<void> {
       const row =
         c.name.padEnd(COL.container) +
         c.imageTag.padEnd(COL.image) +
-        statusColour(c.status).padEnd(COL.status) +
+        statusColour(c.status.padEnd(COL.status)) +
         timeAgo(c.created);
       console.log(row);
     }
@@ -72,6 +67,6 @@ export async function statusCommand(): Promise<void> {
       console.log(`\nDisk used by mongo-docker images: ${formatBytes(total)}`);
     }
   } catch {
-    // non-critical, skip disk line if Docker API fails
+    console.log(chalk.dim('\n(disk usage unavailable)'));
   }
 }

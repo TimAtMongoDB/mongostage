@@ -10,13 +10,13 @@ export interface StartOpts {
 async function attachToContainer(containerId: string): Promise<void> {
   const docker = getDockerClient();
   const container = docker.getContainer(containerId);
-  const stream = await container.attach({ stream: true, stdin: true, stdout: true, stderr: true });
+  const stream = await container.attach({ stream: true, stdin: true, stdout: true, stderr: true }) as NodeJS.ReadWriteStream;
   process.stdin.setRawMode?.(true);
   process.stdin.resume();
-  process.stdin.pipe(stream as unknown as NodeJS.WritableStream);
+  process.stdin.pipe(stream);
   stream.pipe(process.stdout);
   await container.wait();
-  process.stdin.unpipe(stream as unknown as NodeJS.WritableStream);
+  process.stdin.unpipe(stream);
   process.stdin.setRawMode?.(false);
 }
 
@@ -49,19 +49,22 @@ export async function startCommand(
     }
 
     const { default: inquirer } = await import('inquirer');
-    const answer = await inquirer.prompt([
+    const answer = await inquirer.prompt<{ slug: string }>([
       {
         type: 'list',
         name: 'slug',
         message: 'Which container do you want to start?',
         choices: stopped.map(c => ({ name: c.name, value: c.slug })),
       },
-    ]) as { slug: string };
+    ]);
     const target = stopped.find(c => c.slug === answer.slug);
     if (target) {
       await startContainer(target.id);
       console.log(chalk.green('✓') + `  Started ${target.name}`);
       if (opts.attach) await attachToContainer(target.id);
+    } else {
+      console.error(chalk.red('Selected container not found. It may have been removed.'));
+      process.exit(1);
     }
     return;
   }

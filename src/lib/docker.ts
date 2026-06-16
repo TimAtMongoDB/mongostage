@@ -19,7 +19,7 @@ export async function detectDockerState(): Promise<DockerState> {
     await docker.ping();
     return 'running';
   } catch (err: unknown) {
-    const code = (err as NodeJS.ErrnoException).code;
+    const code = err instanceof Error ? (err as NodeJS.ErrnoException).code : undefined;
     if (code === 'ENOENT' || code === 'ECONNREFUSED') {
       return await _checkDockerBinaryExists() ? 'not-running' : 'not-installed';
     }
@@ -68,8 +68,11 @@ export async function pullImage(
   }
 
   await new Promise<void>((resolve, reject) => {
-    docker.pull(tag, (err: Error | null, stream: NodeJS.ReadableStream) => {
+    // Dockerode pull callback types differ from @types/dockerode — the stream is a Modem stream
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    docker.pull(tag, (err: Error | null, stream: any) => {
       if (err) return reject(new Error(`Failed to pull ${tag}: ${err.message}`));
+      if (!stream) return reject(new Error(`Failed to pull ${tag}: no stream returned`));
       docker.modem.followProgress(
         stream,
         (err: Error | null) => (err ? reject(err) : resolve()),
@@ -88,7 +91,11 @@ function _parseEnvFile(envFile?: string): string[] {
       .split('\n')
       .filter(line => line.trim() && !line.startsWith('#'))
       .map(line => line.trim());
-  } catch {
+  } catch (err) {
+    const code = err instanceof Error ? (err as NodeJS.ErrnoException).code : undefined;
+    if (code !== 'ENOENT') {
+      console.error(`Warning: could not read env file (${code ?? 'unknown'}) — no env vars loaded`);
+    }
     return [];
   }
 }
@@ -132,11 +139,12 @@ export async function runContainer(opts: RunContainerOpts): Promise<Dockerode.Co
   if (opts.detach) {
     await container.start({});
   } else {
-    const stream = await container.attach({ stream: true, stdin: true, stdout: true, stderr: true });
-    process.stdin.pipe(stream as unknown as NodeJS.WritableStream);
+    // Dockerode attach returns a duplex Modem stream; NodeJS.ReadWriteStream is the closest type
+    const stream = await container.attach({ stream: true, stdin: true, stdout: true, stderr: true }) as NodeJS.ReadWriteStream;
+    process.stdin.pipe(stream);
     await container.start({});
     await container.wait();
-    process.stdin.unpipe(stream as unknown as NodeJS.WritableStream);
+    process.stdin.unpipe(stream);
   }
 
   return container;
@@ -148,8 +156,14 @@ export async function stopContainer(nameOrId: string): Promise<void> {
     const container = docker.getContainer(nameOrId);
     await container.stop();
   } catch (err: unknown) {
-    const msg = (err as Error).message ?? '';
-    if (!msg.includes('not running') && !msg.includes('304')) throw err;
+    // Dockerode wraps HTTP errors; 304 (not modified = already stopped) and
+    // ECONNRESET from a container that stops mid-request are expected non-errors
+    if (err instanceof Error) {
+      const statusCode = (err as NodeJS.ErrnoException & { statusCode?: number }).statusCode;
+      if (statusCode === 304) return;
+      if (err.message.includes('not running')) return;
+    }
+    throw err;
   }
 }
 

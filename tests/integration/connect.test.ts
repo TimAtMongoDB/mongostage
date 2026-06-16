@@ -12,14 +12,13 @@ const BIN = resolve(__dirname, '../../dist/index.js');
 
 // Clean up test containers after each test
 afterEach(async () => {
-  const { findContainerBySlug, listManagedContainers } = await import('../../src/lib/containers.js');
+  const { listManagedContainers } = await import('../../src/lib/containers.js');
   const { removeContainer, stopContainer } = await import('../../src/lib/docker.js');
   const containers = await listManagedContainers().catch(() => []);
   for (const c of containers.filter(c => c.slug.includes('test'))) {
     await stopContainer(c.id).catch(() => undefined);
     await removeContainer(c.id, true).catch(() => undefined);
   }
-  void findContainerBySlug; // unused but typed
 });
 
 describe('connect command integration', () => {

@@ -34,6 +34,14 @@ function initialSteps(): Step[] {
   return STEP_LABELS.map(label => ({ label, state: 'pending' as StepState }));
 }
 
+function errMsg(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+function toError(err: unknown): Error {
+  return err instanceof Error ? err : new Error(String(err));
+}
+
 function StepRow({ step }: { step: Step }): JSX.Element {
   const icon =
     step.state === 'complete' ? <Text color="#00ED64">✓ </Text> :
@@ -76,6 +84,7 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
     setSteps(prev => prev.map((s, i) => i === idx ? { ...s, state, note } : s));
   }
 
+  // Empty deps intentional: this effect runs exactly once on mount to drive the launch sequence
   useEffect(() => {
     let alive = true;
 
@@ -90,8 +99,8 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         dockerState = await detectDockerState();
         updateStep(0, 'complete');
       } catch (err) {
-        updateStep(0, 'error', (err as Error).message);
-        onError(err as Error);
+        updateStep(0, 'error', errMsg(err));
+        onError(toError(err));
         return;
       }
 
@@ -112,8 +121,8 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         await pullImage(image.tag, (msg) => { pullNote = msg; });
         updateStep(2, 'complete', pullNote || undefined);
       } catch (err) {
-        updateStep(2, 'error', (err as Error).message);
-        onError(err as Error);
+        updateStep(2, 'error', errMsg(err));
+        onError(toError(err));
         return;
       }
 
@@ -148,8 +157,8 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
           updateStep(3, 'complete');
         }
       } catch (err) {
-        updateStep(3, 'error', (err as Error).message);
-        onError(err as Error);
+        updateStep(3, 'error', errMsg(err));
+        onError(toError(err));
         return;
       }
 
@@ -164,7 +173,7 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
           updateStep(4, 'complete');
         } catch (err) {
           updateStep(4, 'error', `Container stopped unexpectedly. Run \`docker logs ${containerName}\` for details.`);
-          onError(err as Error);
+          onError(toError(err));
           return;
         }
       }
@@ -176,17 +185,17 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         updateStep(5, 'complete');
         if (alive) onComplete();
       } catch (err) {
-        updateStep(5, 'error', (err as Error).message);
-        onError(err as Error);
+        updateStep(5, 'error', errMsg(err));
+        onError(toError(err));
       }
     }
 
     run().catch(err => {
-      if (alive) onError(err as Error);
+      if (alive) onError(toError(err));
     });
 
     return () => { alive = false; };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const slug = getSlugFromTag(image.tag);
 
