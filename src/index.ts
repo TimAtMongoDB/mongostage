@@ -182,9 +182,11 @@ if (isMain) {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    // TUI is implemented in Wave 4 (10-tui-app-shell)
-    // For now, display help when invoked with no arguments
-    createProgram().help();
+    const { default: App } = await import('./tui/App.js');
+    const { default: React } = await import('react');
+    const { render } = await import('ink');
+    const { getImages } = await import('./lib/config.js');
+    render(React.createElement(App, { images: getImages() }));
   } else {
     const program = createProgram();
     try {
