@@ -5,6 +5,7 @@ import { PageTabs, type ActivePage } from './PageTabs.js';
 import { ImagesPage as _ImagesPage } from './images/ImagesPage.js';
 import { ContainersPage as _ContainersPage } from './containers/ContainersPage.js';
 import { LaunchScreen } from './LaunchScreen.js';
+import { Logo } from './Logo.js';
 
 interface AppProps {
   images: ImageConfig[];
@@ -84,9 +85,7 @@ export default function App({ images }: AppProps): JSX.Element {
 
   return (
     <Box flexDirection="column">
-      <Box marginLeft={2}>
-        <Text>🍃  mongo-docker</Text>
-      </Box>
+      <Logo />
       <Box>
         <Text> </Text>
       </Box>

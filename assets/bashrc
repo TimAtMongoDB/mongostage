@@ -1,0 +1,24 @@
+# Clear screen — no OS info, no last login, no motd
+clear
+
+# Render MongoDB leaf centred in MongoDB green (#00ED64 = RGB 0,237,100)
+TERM_COLS=$(tput cols)
+TERM_ROWS=$(tput lines)
+LEAF_COLS=40   # approximate width of leaf art
+LEAF_ROWS=12   # approximate height of leaf art
+H_PAD=$(( (TERM_COLS - LEAF_COLS) / 2 ))
+V_PAD=$(( (TERM_ROWS - LEAF_ROWS) / 2 ))
+
+# Print vertical padding
+for i in $(seq 1 $V_PAD); do echo; done
+
+# Print leaf with horizontal padding in MongoDB green
+while IFS= read -r line; do
+  printf "%${H_PAD}s" ""
+  printf "\033[38;2;0;237;100m%s\033[0m\n" "$line"
+done < /etc/mongodb/leaf.txt
+
+echo
+
+# Initialise Starship prompt
+eval "$(starship init bash)"
