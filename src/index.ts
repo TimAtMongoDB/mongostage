@@ -89,25 +89,31 @@ export function createProgram(): Command {
   program
     .command('stop [image]')
     .description('Stop a running container')
-    .action(async (image: string | undefined) => {
+    .option('--image <slug>', 'container slug to stop (alternative to positional arg)')
+    .option('--all', 'stop all running mongo-docker containers')
+    .action(async (image: string | undefined, opts: { image?: string; all?: boolean }) => {
       const { stopCommand } = await import('./commands/stop.js');
-      await stopCommand(image);
+      await stopCommand(image, opts);
     });
 
   program
     .command('start [image]')
     .description('Start a stopped container')
-    .action(async (image: string | undefined) => {
+    .option('--image <slug>', 'container slug to start (alternative to positional arg)')
+    .option('--attach', 'attach to bash after starting')
+    .action(async (image: string | undefined, opts: { image?: string; attach?: boolean }) => {
       const { startCommand } = await import('./commands/start.js');
-      await startCommand(image);
+      await startCommand(image, opts);
     });
 
   program
     .command('run [image]')
     .description('Run a container in detached mode')
+    .option('--image <slug>', 'image slug to run (alternative to positional arg)')
+    .option('--port <mapping>', 'port mapping e.g. 27017:27017')
     .option('--env <file>', 'environment file to load')
     .option('--mount <path>', 'host path to mount at ~/demo')
-    .action(async (image: string | undefined, opts: { env?: string; mount?: string }) => {
+    .action(async (image: string | undefined, opts: { image?: string; port?: string; env?: string; mount?: string }) => {
       const { runCommand } = await import('./commands/run.js');
       await runCommand(image, opts);
     });
@@ -115,8 +121,10 @@ export function createProgram(): Command {
   program
     .command('remove [image]')
     .description('Remove a container')
-    .option('--force', 'force remove even if running')
-    .action(async (image: string | undefined, opts: { force?: boolean }) => {
+    .option('--image <slug>', 'container slug to remove (alternative to positional arg)')
+    .option('--force', 'stop and remove even if running')
+    .option('--all', 'remove all stopped containers (with confirmation)')
+    .action(async (image: string | undefined, opts: { image?: string; force?: boolean; all?: boolean }) => {
       const { removeCommand } = await import('./commands/remove.js');
       await removeCommand(image, opts);
     });
@@ -124,8 +132,9 @@ export function createProgram(): Command {
   program
     .command('clean')
     .description('Remove all stopped mongo-docker containers')
-    .option('--dry-run', 'preview what would be removed')
-    .action(async (opts: { dryRun?: boolean }) => {
+    .option('--images', 'also remove locally pulled Docker images')
+    .option('--force', 'stop and remove all containers, running or not')
+    .action(async (opts: { images?: boolean; force?: boolean }) => {
       const { cleanCommand } = await import('./commands/clean.js');
       await cleanCommand(opts);
     });
