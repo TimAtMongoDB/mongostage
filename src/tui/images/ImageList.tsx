@@ -5,7 +5,6 @@ import type { ImageConfig } from '../../types/image.js';
 interface ImageListProps {
   images: ImageConfig[];
   selectedIndex: number;
-  onSelectIndex: (index: number) => void;
 }
 
 function slugFromTag(tag: string): string {

@@ -15,10 +15,18 @@ const DEFAULT_REPO = 'mongo-docker';
 
 let _registry: ImageRegistry | null = null;
 
+function parseRegistry(raw: string): ImageRegistry {
+  const parsed: unknown = JSON.parse(raw);
+  if (typeof parsed !== 'object' || parsed === null || !Array.isArray((parsed as Record<string, unknown>)['images'])) {
+    throw new Error('images.json does not match expected ImageRegistry shape');
+  }
+  return parsed as ImageRegistry;
+}
+
 function loadRegistry(): ImageRegistry {
   if (_registry) return _registry;
   const raw = readFileSync(REGISTRY_PATH, 'utf8');
-  _registry = JSON.parse(raw) as ImageRegistry;
+  _registry = parseRegistry(raw);
   return _registry;
 }
 
@@ -62,8 +70,16 @@ const CLI_CONFIG_DEFAULTS: CliConfig = {
 export function getCliConfig(): CliConfig {
   try {
     const raw = readFileSync(CONFIG_PATH, 'utf8');
-    return { ...CLI_CONFIG_DEFAULTS, ...JSON.parse(raw) };
-  } catch {
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed === 'object' && parsed !== null) {
+      return { ...CLI_CONFIG_DEFAULTS, ...(parsed as Partial<CliConfig>) };
+    }
+    return { ...CLI_CONFIG_DEFAULTS };
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code !== 'ENOENT') {
+      console.error(`Warning: could not read CLI config (${code ?? 'unknown error'}) — using defaults`);
+    }
     return { ...CLI_CONFIG_DEFAULTS };
   }
 }

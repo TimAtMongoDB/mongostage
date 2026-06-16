@@ -37,13 +37,13 @@ function expandTilde(p: string): string {
 async function attachExisting(containerId: string): Promise<void> {
   const docker = getDockerClient();
   const container = docker.getContainer(containerId);
-  const stream = await container.attach({ stream: true, stdin: true, stdout: true, stderr: true });
+  const stream = await container.attach({ stream: true, stdin: true, stdout: true, stderr: true }) as NodeJS.ReadWriteStream;
   process.stdin.setRawMode?.(true);
   process.stdin.resume();
-  process.stdin.pipe(stream as unknown as NodeJS.WritableStream);
+  process.stdin.pipe(stream);
   stream.pipe(process.stdout);
   await container.wait();
-  process.stdin.unpipe(stream as unknown as NodeJS.WritableStream);
+  process.stdin.unpipe(stream);
   process.stdin.setRawMode?.(false);
 }
 
@@ -68,7 +68,7 @@ export async function connectCommand(
   if (!inputSlug) {
     const { default: inquirer } = await import('inquirer');
     const images = getImages();
-    const answer = await inquirer.prompt([
+    const answer = await inquirer.prompt<{ tag: string }>([
       {
         type: 'list',
         name: 'tag',
@@ -78,7 +78,7 @@ export async function connectCommand(
           value: img.tag,
         })),
       },
-    ]) as { tag: string };
+    ]);
     fullTag = answer.tag;
     slug = getSlugFromTag(fullTag);
   } else {

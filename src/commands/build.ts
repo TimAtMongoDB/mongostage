@@ -27,7 +27,10 @@ async function getLocalTags(): Promise<Set<string>> {
       const lines = Buffer.concat(chunks).toString().trim().split('\n').filter(Boolean);
       resolve(new Set(lines));
     });
-    proc.on('error', () => resolve(new Set()));
+    proc.on('error', (err) => {
+      console.warn(`Warning: could not list local Docker images: ${err.message}`);
+      resolve(new Set());
+    });
   });
 }
 

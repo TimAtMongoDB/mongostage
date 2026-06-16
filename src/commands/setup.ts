@@ -10,16 +10,12 @@ import { detectDockerState, pollDockerReady, streamCommand } from '../lib/docker
 import { installColima, startColima } from '../lib/colima.js';
 import { saveCliConfig } from '../lib/config.js';
 import { downloadAndExecScript } from '../lib/install.js';
+import { PreflightError } from '../lib/errors.js';
 import type { Platform } from '../lib/os.js';
 
-const execFileAsync = promisify(execFile);
+export { PreflightError };
 
-export class PreflightError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'PreflightError';
-  }
-}
+const execFileAsync = promisify(execFile);
 
 async function commandExists(cmd: string): Promise<boolean> {
   const { spawn } = await import('node:child_process');
@@ -100,8 +96,9 @@ async function handleLinux(state: 'not-running' | 'not-installed'): Promise<'eng
     await startRootlessDaemon();
     await pollDockerReady(2000, 30000);
     daemonSpinner.succeed('Docker daemon started');
-  } catch {
-    rootlessSpinner.fail('Rootless install failed — trying system-level install...');
+  } catch (rootlessErr) {
+    const rootlessMsg = rootlessErr instanceof Error ? rootlessErr.message : String(rootlessErr);
+    rootlessSpinner.fail(`Rootless install failed (${rootlessMsg}) — trying system-level install...`);
 
     const sudoSpinner = ora('Installing Docker Engine (system)...').start();
     try {
@@ -164,7 +161,7 @@ async function handleMac(state: 'not-running' | 'not-installed'): Promise<'colim
     installSpinner.succeed('Colima and Docker installed');
   } catch (err) {
     installSpinner.fail();
-    if (err instanceof PreflightError || (err instanceof Error && err.name === 'PreflightError')) {
+    if (err instanceof PreflightError) {
       console.error(
         chalk.red('✗') +
           '  Homebrew is required but not installed.\n' +

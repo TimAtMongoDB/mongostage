@@ -19,7 +19,9 @@ export function createProgram(): Command {
     .name('mongo-docker')
     .description('MongoDB Docker environments for demos, workshops, and content creation')
     .version('1.0.0')
-    .allowUnknownOption(false);
+    .allowUnknownOption(false)
+    .option('--verbose', 'enable verbose output')
+    .option('--silent', 'suppress all non-error output');
 
   program
     .command('connect [image]')

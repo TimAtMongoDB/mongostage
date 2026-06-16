@@ -87,13 +87,12 @@ export function ImagesPage({ images, onLaunch, footerHint }: ImagesPageProps): J
 
   return (
     <Box flexDirection="column" flexGrow={1}>
-      <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+      <FilterBar activeFilter={activeFilter} />
       <Box flexDirection="row" flexGrow={1}>
         <Box flexDirection="column" width="50%">
           <ImageList
             images={filteredImages}
             selectedIndex={selectedIndex}
-            onSelectIndex={setSelectedIndex}
           />
         </Box>
         <Box flexDirection="column" width="50%">

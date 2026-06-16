@@ -37,10 +37,9 @@ async function buildSetup(overrides: SetupMocks = {}) {
     ? vi.fn().mockRejectedValue(new Error('command failed'))
     : vi.fn().mockResolvedValue(undefined);
   const mockInstallColima = colimaInstallFails
-    ? vi.fn().mockImplementation(() => {
-        const err = new Error('Homebrew not found. Install Homebrew first: https://brew.sh');
-        err.name = 'PreflightError';
-        return Promise.reject(err);
+    ? vi.fn().mockImplementation(async () => {
+        const { PreflightError } = await import('../../src/lib/errors.js');
+        throw new PreflightError('Homebrew not found. Install Homebrew first: https://brew.sh');
       })
     : vi.fn().mockResolvedValue(undefined);
   const mockStartColima = vi.fn().mockResolvedValue(undefined);

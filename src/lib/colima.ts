@@ -1,25 +1,12 @@
 import { streamCommand } from './docker.js';
+import { PreflightError } from './errors.js';
 
-class PreflightError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'PreflightError';
-  }
-}
+export { PreflightError };
 
-async function which(cmd: string): Promise<boolean> {
+async function commandExists(cmd: string, args: string[] = ['--version']): Promise<boolean> {
   const { spawn } = await import('node:child_process');
   return new Promise(resolve => {
-    const proc = spawn('which', [cmd], { stdio: 'pipe' });
-    proc.on('close', code => resolve(code === 0));
-    proc.on('error', () => resolve(false));
-  });
-}
-
-async function commandExists(cmd: string): Promise<boolean> {
-  const { spawn } = await import('node:child_process');
-  return new Promise(resolve => {
-    const proc = spawn(cmd, ['--version'], { stdio: 'pipe' });
+    const proc = spawn(cmd, args, { stdio: 'pipe' });
     proc.on('close', code => resolve(code === 0));
     proc.on('error', () => resolve(false));
   });
@@ -41,7 +28,7 @@ export async function isColimaRunning(): Promise<boolean> {
 }
 
 export async function installColima(onProgress?: (msg: string) => void): Promise<void> {
-  const brewExists = await which('brew');
+  const brewExists = await commandExists('brew', ['--version']);
   if (!brewExists) {
     throw new PreflightError(
       'Homebrew not found. Install Homebrew first: https://brew.sh'

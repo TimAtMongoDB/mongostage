@@ -7,11 +7,20 @@ import https from 'node:https';
 
 const execFileAsync = promisify(execFile);
 
+const ALLOWED_URLS = new Set([
+  'https://get.docker.com/rootless',
+  'https://get.docker.com',
+]);
+
 export async function downloadAndExecScript(
   url: string,
   opts: { sudo?: boolean } = {}
 ): Promise<void> {
-  const scriptPath = join(tmpdir(), `docker-install-${Date.now()}.sh`);
+  if (!ALLOWED_URLS.has(url)) {
+    throw new Error(`Blocked: URL not in the install allowlist: ${url}`);
+  }
+
+  const scriptPath = join(tmpdir(), `docker-install-${process.pid}.sh`);
 
   await new Promise<void>((resolve, reject) => {
     const file = createWriteStream(scriptPath);
@@ -19,14 +28,10 @@ export async function downloadAndExecScript(
       .get(url, res => {
         res.pipe(file);
         file.on('finish', () => {
-          (file as unknown as { close: (cb: () => void) => void }).close(resolve);
+          (file as import('node:fs').WriteStream).close(() => resolve());
         });
         file.on('error', err => {
-          try {
-            unlinkSync(scriptPath);
-          } catch {
-            // best-effort
-          }
+          try { unlinkSync(scriptPath); } catch { /* best-effort */ }
           reject(err);
         });
       })
@@ -42,10 +47,6 @@ export async function downloadAndExecScript(
       await execFileAsync('sh', [scriptPath]);
     }
   } finally {
-    try {
-      unlinkSync(scriptPath);
-    } catch {
-      // best-effort cleanup
-    }
+    try { unlinkSync(scriptPath); } catch { /* best-effort cleanup */ }
   }
 }

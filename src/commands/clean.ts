@@ -1,16 +1,11 @@
 import chalk from 'chalk';
 import { detectDockerState, stopContainer, removeContainer, getDockerClient } from '../lib/docker.js';
 import { listManagedContainers } from '../lib/containers.js';
+import { formatBytes } from '../lib/format.js';
 
 export interface CleanOpts {
   images?: boolean;
   force?: boolean;
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)}GB`;
-  if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(0)}MB`;
-  return `${Math.round(bytes / 1e3)}KB`;
 }
 
 export async function cleanCommand(opts: CleanOpts = {}): Promise<void> {
@@ -49,14 +44,14 @@ export async function cleanCommand(opts: CleanOpts = {}): Promise<void> {
   }
 
   const { default: inquirer } = await import('inquirer');
-  const answer = await inquirer.prompt([
+  const answer = await inquirer.prompt<{ ok: boolean }>([
     {
       type: 'confirm',
       name: 'ok',
       message: `Remove ${toRemove.length} container(s)${opts.images ? ' and images' : ''}?`,
       default: false,
     },
-  ]) as { ok: boolean };
+  ]);
 
   if (!answer.ok) {
     console.log('Aborted.');
@@ -79,8 +74,9 @@ export async function cleanCommand(opts: CleanOpts = {}): Promise<void> {
       try {
         await docker.getImage(img.Id).remove({ force: true });
         freedBytes += img.Size ?? 0;
-      } catch {
-        // image may be in use by another container
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.warn(chalk.yellow(`Warning: could not remove image ${img.Id.slice(0, 12)}: ${msg}`));
       }
     }
   }

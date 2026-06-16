@@ -30,7 +30,7 @@ export async function runCommand(
   if (!inputSlug) {
     const { default: inquirer } = await import('inquirer');
     const images = getImages();
-    const answer = await inquirer.prompt([
+    const answer = await inquirer.prompt<{ tag: string }>([
       {
         type: 'list',
         name: 'tag',
@@ -40,7 +40,7 @@ export async function runCommand(
           value: img.tag,
         })),
       },
-    ]) as { tag: string };
+    ]);
     fullTag = answer.tag;
     slug = getSlugFromTag(fullTag);
   } else {
@@ -61,7 +61,12 @@ export async function runCommand(
   let mountHost: string | undefined;
   let mountTarget: string | undefined;
   if (opts.mount) {
-    mountHost = resolve(opts.mount.replace(/^~/, homedir()));
+    const resolved = resolve(opts.mount.replace(/^~/, homedir()));
+    const home = homedir();
+    if (!resolved.startsWith(home)) {
+      console.error(chalk.yellow(`Warning: mount path "${resolved}" is outside your home directory. Proceeding anyway.`));
+    }
+    mountHost = resolved;
     mountTarget = '/home/mongo/myproject';
   }
 

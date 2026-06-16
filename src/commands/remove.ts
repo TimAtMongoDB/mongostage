@@ -8,17 +8,26 @@ export interface RemoveOpts {
   all?: boolean;
 }
 
+const SLUG_PATTERN = /^[a-z0-9-]+$/;
+
+function validateSlug(slug: string): void {
+  if (!SLUG_PATTERN.test(slug)) {
+    console.error(chalk.red(`Invalid container slug "${slug}". Slugs must match /^[a-z0-9-]+$/`));
+    process.exit(1);
+  }
+}
+
 async function confirmRemove(name: string): Promise<boolean> {
   const { default: inquirer } = await import('inquirer');
-  const answer = await inquirer.prompt([
+  const answer = await inquirer.prompt<{ ok: boolean }>([
     {
       type: 'confirm',
       name: 'ok',
       message: `Remove ${name}?`,
       default: false,
     },
-  ]) as { ok: boolean };
-  return answer.ok;
+  ]);
+  return Boolean(answer.ok);
 }
 
 export async function removeCommand(
@@ -44,16 +53,16 @@ export async function removeCommand(
     for (const c of removable) console.log(`  ${c.name}  (${c.status})`);
 
     const { default: inquirer } = await import('inquirer');
-    const answer = await inquirer.prompt([
+    const answer = await inquirer.prompt<{ ok: boolean }>([
       {
         type: 'confirm',
         name: 'ok',
         message: `Remove ${removable.length} container(s)?`,
         default: false,
       },
-    ]) as { ok: boolean };
+    ]);
 
-    if (!answer.ok) {
+    if (!Boolean(answer.ok)) {
       console.log('Aborted.');
       return;
     }
@@ -87,14 +96,14 @@ export async function removeCommand(
     }
 
     const { default: inquirer } = await import('inquirer');
-    const answer = await inquirer.prompt([
+    const answer = await inquirer.prompt<{ slug: string }>([
       {
         type: 'list',
         name: 'slug',
         message: 'Which container do you want to remove?',
         choices: candidates.map(c => ({ name: `${c.name}  (${c.status})`, value: c.slug })),
       },
-    ]) as { slug: string };
+    ]);
     const target = candidates.find(c => c.slug === answer.slug);
     if (!target) return;
 
@@ -105,6 +114,8 @@ export async function removeCommand(
     console.log(chalk.green('✓') + `  Removed ${target.name}`);
     return;
   }
+
+  validateSlug(slug);
 
   const container = await findContainerBySlug(slug);
   if (!container) {
