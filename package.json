@@ -1,5 +1,5 @@
 {
-  "name": "mongo-docker",
+  "name": "@timatmongodb/mongo-docker",
   "version": "0.1.0",
   "description": "MongoDB-branded Docker environments for demos and content creation",
   "type": "module",
@@ -14,6 +14,9 @@
     "assets/",
     "images.json"
   ],
+  "publishConfig": {
+    "@timatmongodb:registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "tsc && chmod +x dist/index.js",
     "typecheck": "tsc --noEmit",

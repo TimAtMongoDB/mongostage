@@ -1,0 +1,38 @@
+format = """
+🍃 [MongoDB](white) [$directory](white dimmed)
+[❯](color_green) """
+
+[directory]
+style = "white dimmed"
+truncation_length = 3
+truncate_to_repo = false
+
+[git_branch]
+disabled = true
+
+[git_status]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[package]
+disabled = true
+
+[cmd_duration]
+disabled = true
+
+[username]
+disabled = true
+
+[hostname]
+disabled = true
+
+[time]
+disabled = true
+
+[battery]
+disabled = true
+
+[palettes.default]
+color_green = "#00ED64"

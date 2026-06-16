@@ -8,5 +8,6 @@ dist/
 MDs/
 _ai_temp/
 *.log
+docs/
 .DS_Store
 Thumbs.db

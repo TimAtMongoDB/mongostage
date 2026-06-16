@@ -149,9 +149,11 @@ export function createProgram(): Command {
 
   program
     .command('build [image]')
-    .description('(admin) Build a Docker image')
-    .option('--push', 'push after building')
-    .action(async (image: string | undefined, opts: { push?: boolean }) => {
+    .description('(admin) Build a Docker image from component Dockerfiles')
+    .option('--push', 'push to Docker Hub after building')
+    .option('--no-cache', 'build without Docker layer cache')
+    .option('--dry-run', 'print the generated Dockerfile without building')
+    .action(async (image: string | undefined, opts: { push?: boolean; noCache?: boolean; dryRun?: boolean }) => {
       const { buildCommand } = await import('./commands/build.js');
       await buildCommand(image, opts);
     });
@@ -166,10 +168,12 @@ export function createProgram(): Command {
 
   program
     .command('publish')
-    .description('(admin) Publish npm package to GitHub Packages')
-    .action(async () => {
+    .description('(admin) Bump version, build, and publish to GitHub Packages')
+    .option('--bump <type>', 'version bump type: patch, minor, major, or semver string')
+    .option('--dry-run', 'show what would be published without publishing')
+    .action(async (opts: { bump?: string; dryRun?: boolean }) => {
       const { publishCommand } = await import('./commands/publish.js');
-      await publishCommand();
+      await publishCommand(opts);
     });
 
   return program;

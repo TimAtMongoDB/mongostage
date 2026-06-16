@@ -1,4 +1,36 @@
-// Implemented in 16-build-push-commands (Wave 5)
-export async function pushCommand(_image: string | undefined): Promise<void> {
-  throw new Error('push command not yet implemented');
+import { getImageBySlug, resolveFullTag } from '../lib/config.js';
+import { listLocalImages, streamCommand } from '../lib/docker.js';
+
+export async function pushCommand(imageArg: string | undefined): Promise<void> {
+  if (!imageArg) {
+    console.error('Usage: mongo-docker push <tag>');
+    console.error('Example: mongo-docker push node-shell-claude');
+    process.exit(1);
+  }
+
+  const fullTag = resolveFullTag(imageArg);
+
+  // Validate tag is known
+  const imageConfig = getImageBySlug(imageArg);
+  if (!imageConfig) {
+    console.error(`Unknown tag: ${imageArg}. Check images.json.`);
+    process.exit(1);
+  }
+
+  // Verify local image exists before attempting push
+  const local = await listLocalImages(fullTag);
+  if (local.length === 0) {
+    console.error(`Image not found locally: ${fullTag}`);
+    console.error(`Build it first: mongo-docker build ${imageArg}`);
+    process.exit(1);
+  }
+
+  console.log(`Pushing ${fullTag} ...`);
+  await streamCommand('docker', ['push', fullTag]);
+
+  console.log(`\n✓ Pushed ${fullTag}`);
+  console.log('\nDon\'t forget:');
+  console.log('  1. Add/update the entry in images.json if new');
+  console.log('  2. Run npm publish');
+  console.log('  Users will see the new image on next: npm update -g mongo-docker');
 }
