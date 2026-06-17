@@ -179,6 +179,26 @@ export function createProgram(): Command {
       await publishCommand(opts);
     });
 
+  const timezone = program
+    .command('timezone')
+    .description('Manage the timezone applied to all containers');
+
+  timezone
+    .command('set <tz>')
+    .description('Set the timezone (IANA format, e.g. America/New_York)')
+    .action(async (tz: string) => {
+      const { timezoneSetCommand } = await import('./commands/timezone.js');
+      await timezoneSetCommand(tz);
+    });
+
+  timezone
+    .command('show')
+    .description('Show the currently configured timezone')
+    .action(async () => {
+      const { timezoneShowCommand } = await import('./commands/timezone.js');
+      await timezoneShowCommand();
+    });
+
   return program;
 }
 

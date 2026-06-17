@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { detectDockerState, runContainer } from '../lib/docker.js';
 import { getImageBySlug, getImages } from '../lib/config.js';
 import { getContainerName, getSlugFromTag } from '../lib/containers.js';
@@ -57,6 +57,16 @@ export async function runCommand(
 
   const containerName = getContainerName(slug);
   const ports = opts.port ? [opts.port] : [];
+
+  const defaultEnvFile = join(homedir(), '.mongostage', '.env');
+  if (existsSync(defaultEnvFile)) {
+    const lines = readFileSync(defaultEnvFile, 'utf8').split('\n');
+    if (!lines.some(l => l.startsWith('TZ='))) {
+      console.log(chalk.yellow("Tip: set a timezone with 'mongostage timezone set <tz>' so container time is correct."));
+    }
+  } else {
+    console.log(chalk.yellow("Tip: set a timezone with 'mongostage timezone set <tz>' so container time is correct."));
+  }
 
   let mountHost: string | undefined;
   let mountTarget: string | undefined;
