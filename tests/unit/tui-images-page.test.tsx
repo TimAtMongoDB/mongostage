@@ -21,11 +21,11 @@ function makeMockStdin() {
 }
 
 const SAMPLE_IMAGES: ImageConfig[] = [
-  { tag: 'timatmongodb/mongo-docker:base', components: ['base'], description: 'Base Ubuntu image', category: 'base' },
-  { tag: 'timatmongodb/mongo-docker:shell', components: ['base', 'shell'], description: 'Ubuntu + shell tools', category: 'shell' },
-  { tag: 'timatmongodb/mongo-docker:node', components: ['base', 'shell', 'node'], description: 'Ubuntu + Node.js', category: 'runtime' },
-  { tag: 'timatmongodb/mongo-docker:node-shell-claude', components: ['base', 'shell', 'node', 'claude'], description: 'Ubuntu + Node + Claude', category: 'ai' },
-  { tag: 'timatmongodb/mongo-docker:server-node', components: ['base', 'shell', 'node', 'server'], description: 'Node.js server image', category: 'server' },
+  { tag: 'timatmongodb/mongostage:base', components: ['base'], description: 'Base Ubuntu image', category: 'base' },
+  { tag: 'timatmongodb/mongostage:shell', components: ['base', 'shell'], description: 'Ubuntu + shell tools', category: 'shell' },
+  { tag: 'timatmongodb/mongostage:node', components: ['base', 'shell', 'node'], description: 'Ubuntu + Node.js', category: 'runtime' },
+  { tag: 'timatmongodb/mongostage:node-shell-claude', components: ['base', 'shell', 'node', 'claude'], description: 'Ubuntu + Node + Claude', category: 'ai' },
+  { tag: 'timatmongodb/mongostage:server-node', components: ['base', 'shell', 'node', 'server'], description: 'Node.js server image', category: 'server' },
 ];
 
 async function renderImagesPage(opts: {
@@ -223,7 +223,7 @@ describe('ImagesPage', () => {
 
     it('should show "No images found" when filter has no matches', async () => {
       const { lastFrame, pressKey, instance } = await renderImagesPage({
-        images: [{ tag: 'timatmongodb/mongo-docker:base', components: ['base'], description: 'Base', category: 'base' }],
+        images: [{ tag: 'timatmongodb/mongostage:base', components: ['base'], description: 'Base', category: 'base' }],
       });
       // Cycle to Runtime — no runtime images exist
       await pressKey('\x1b[C'); // Base
@@ -273,7 +273,7 @@ describe('ImagesPage', () => {
     it('should show tag slug in detail panel for selected image', async () => {
       const { lastFrame, instance } = await renderImagesPage();
       const frame = lastFrame();
-      expect(frame).toContain('base'); // slug from timatmongodb/mongo-docker:base
+      expect(frame).toContain('base'); // slug from timatmongodb/mongostage:base
       instance.unmount();
     });
 
@@ -294,7 +294,7 @@ describe('ImagesPage', () => {
     it('should show full Docker Hub tag in detail panel', async () => {
       const { lastFrame, instance } = await renderImagesPage();
       const frame = lastFrame();
-      expect(frame).toContain('timatmongodb/mongo-docker:base');
+      expect(frame).toContain('timatmongodb/mongostage:base');
       instance.unmount();
     });
   });

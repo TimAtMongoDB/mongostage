@@ -26,7 +26,7 @@ describe('README.md', () => {
     it('should document all major CLI commands', () => {
       const commands = ['connect', 'list', 'env', 'setup', 'stop', 'start', 'run', 'remove', 'clean', 'status'];
       for (const cmd of commands) {
-        expect(content, `README should mention ${cmd} command`).toContain(`mongo-docker ${cmd}`);
+        expect(content, `README should mention ${cmd} command`).toContain(`mongostage ${cmd}`);
       }
     });
 
@@ -34,8 +34,8 @@ describe('README.md', () => {
       expect(content).toMatch(/tui|interactive/i);
     });
 
-    it('should document the env file at ~/.mongo-docker/.env', () => {
-      expect(content).toContain('.mongo-docker');
+    it('should document the env file at ~/.mongostage/.env', () => {
+      expect(content).toContain('.mongostage');
       expect(content).toContain('.env');
     });
 

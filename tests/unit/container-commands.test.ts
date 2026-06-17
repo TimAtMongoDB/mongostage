@@ -8,8 +8,8 @@ afterEach(() => {
 
 const RUNNING: ContainerState = {
   id: 'abc1',
-  name: 'mongo-docker-node-shell',
-  imageTag: 'timatmongodb/mongo-docker:node-shell',
+  name: 'mongostage-node-shell',
+  imageTag: 'timatmongodb/mongostage:node-shell',
   slug: 'node-shell',
   status: 'running',
   created: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
@@ -17,8 +17,8 @@ const RUNNING: ContainerState = {
 
 const STOPPED: ContainerState = {
   id: 'def2',
-  name: 'mongo-docker-base',
-  imageTag: 'timatmongodb/mongo-docker:base',
+  name: 'mongostage-base',
+  imageTag: 'timatmongodb/mongostage:base',
   slug: 'base',
   status: 'exited',
   created: new Date(Date.now() - 3 * 86400 * 1000).toISOString(),
@@ -205,7 +205,7 @@ describe('stopCommand()', () => {
   });
 
   it('should stop all running containers when --all is given', async () => {
-    const second: ContainerState = { ...RUNNING, id: 'xyz', name: 'mongo-docker-base2', slug: 'base2' };
+    const second: ContainerState = { ...RUNNING, id: 'xyz', name: 'mongostage-base2', slug: 'base2' };
     const { stopCommand, mocks } = await buildStop({ containers: [RUNNING, second] });
     await stopCommand(undefined, { all: true });
     expect(mocks.stop).toHaveBeenCalledTimes(2);
@@ -386,14 +386,14 @@ describe('statusCommand()', () => {
     const { statusCommand } = await buildStatus({ containers: [RUNNING, STOPPED] });
     await statusCommand();
     const allOutput = logSpy.mock.calls.flat().join(' ');
-    expect(allOutput).toContain('mongo-docker-node-shell');
-    expect(allOutput).toContain('mongo-docker-base');
+    expect(allOutput).toContain('mongostage-node-shell');
+    expect(allOutput).toContain('mongostage-base');
   });
 
   it('should show "no containers" message when none exist', async () => {
     const { statusCommand } = await buildStatus({ containers: [] });
     await statusCommand();
     const allOutput = logSpy.mock.calls.flat().join(' ');
-    expect(allOutput).toMatch(/[Nn]o mongo-docker containers/);
+    expect(allOutput).toMatch(/[Nn]o mongostage containers/);
   });
 });

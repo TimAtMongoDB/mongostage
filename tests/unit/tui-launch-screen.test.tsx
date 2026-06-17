@@ -21,7 +21,7 @@ function makeMockStdin() {
 }
 
 const SAMPLE_IMAGE: ImageConfig = {
-  tag: 'timatmongodb/mongo-docker:node-shell-claude',
+  tag: 'timatmongodb/mongostage:node-shell-claude',
   components: ['base', 'shell', 'node', 'claude'],
   description: 'Ubuntu + Node.js + Claude Code',
   category: 'ai',
@@ -78,14 +78,14 @@ async function renderLaunchScreen(opts: LaunchMocks = {}) {
     listManagedContainers: vi.fn(async () => []),
     findContainerBySlug: vi.fn(async () => {
       if (containerExistsRunning) {
-        return { id: 'abc', name: 'mongo-docker-node-shell-claude', slug: 'node-shell-claude', status: 'running', created: new Date().toISOString(), imageTag: SAMPLE_IMAGE.tag };
+        return { id: 'abc', name: 'mongostage-node-shell-claude', slug: 'node-shell-claude', status: 'running', created: new Date().toISOString(), imageTag: SAMPLE_IMAGE.tag };
       }
       if (containerExistsStopped) {
-        return { id: 'abc', name: 'mongo-docker-node-shell-claude', slug: 'node-shell-claude', status: 'stopped', created: new Date().toISOString(), imageTag: SAMPLE_IMAGE.tag };
+        return { id: 'abc', name: 'mongostage-node-shell-claude', slug: 'node-shell-claude', status: 'stopped', created: new Date().toISOString(), imageTag: SAMPLE_IMAGE.tag };
       }
       return undefined;
     }),
-    getContainerName: vi.fn((slug: string) => `mongo-docker-${slug}`),
+    getContainerName: vi.fn((slug: string) => `mongostage-${slug}`),
     getSlugFromTag: vi.fn((tag: string) => tag.split(':')[1] ?? tag),
   }));
 

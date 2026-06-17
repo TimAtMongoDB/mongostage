@@ -3,8 +3,8 @@ import { listLocalImages, streamCommand } from '../lib/docker.js';
 
 export async function pushCommand(imageArg: string | undefined): Promise<void> {
   if (!imageArg) {
-    console.error('Usage: mongo-docker push <tag>');
-    console.error('Example: mongo-docker push node-shell-claude');
+    console.error('Usage: mongostage push <tag>');
+    console.error('Example: mongostage push node-shell-claude');
     process.exit(1);
   }
 
@@ -21,7 +21,7 @@ export async function pushCommand(imageArg: string | undefined): Promise<void> {
   const local = await listLocalImages(fullTag);
   if (local.length === 0) {
     console.error(`Image not found locally: ${fullTag}`);
-    console.error(`Build it first: mongo-docker build ${imageArg}`);
+    console.error(`Build it first: mongostage build ${imageArg}`);
     process.exit(1);
   }
 
@@ -32,5 +32,5 @@ export async function pushCommand(imageArg: string | undefined): Promise<void> {
   console.log('\nDon\'t forget:');
   console.log('  1. Add/update the entry in images.json if new');
   console.log('  2. Run npm publish');
-  console.log('  Users will see the new image on next: npm update -g mongo-docker');
+  console.log('  Users will see the new image on next: npm update -g @timatmongodb/mongostage');
 }

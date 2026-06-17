@@ -89,10 +89,10 @@ describe('TUI App Shell', () => {
       instance.unmount();
     });
 
-    it('should render the mongo-docker header', async () => {
+    it('should render the MongoStage header', async () => {
       const { lastFrame, instance } = await renderApp();
       const frame = lastFrame();
-      expect(frame).toContain('mongo-docker');
+      expect(frame).toContain('MongoStage');
       instance.unmount();
     });
   });

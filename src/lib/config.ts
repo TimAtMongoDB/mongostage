@@ -7,11 +7,11 @@ import type { ImageRegistry, ImageConfig, CliConfig } from '../types/image.js';
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const PACKAGE_ROOT = resolve(__dirname, '../../');
 const REGISTRY_PATH = join(PACKAGE_ROOT, 'images.json');
-const CONFIG_DIR = process.env.MONGO_DOCKER_CONFIG_DIR ?? join(homedir(), '.mongo-docker');
+const CONFIG_DIR = process.env.MONGOSTAGE_CONFIG_DIR ?? join(homedir(), '.mongostage');
 const CONFIG_PATH = join(CONFIG_DIR, 'config.json');
 
 const DEFAULT_ORG = 'timatmongodb';
-const DEFAULT_REPO = 'mongo-docker';
+const DEFAULT_REPO = 'mongostage';
 
 let _registry: ImageRegistry | null = null;
 

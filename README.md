@@ -1,31 +1,31 @@
-# mongo-docker
+# MongoStage
 
 MongoDB-branded Docker environments for demos, workshops, and content creation. Comes with a full terminal UI and CLI for managing containers across Linux, macOS, and Windows (WSL2).
 
 ## Requirements
 
 - **Node.js** >= 22
-- **Docker** — not required upfront; `mongo-docker setup` installs it
+- **Docker** — not required upfront; `mongostage setup` installs it
 
 ## Install
 
 ```bash
-npm install -g @timatmongodb/mongo-docker
+npm install -g @timatmongodb/mongostage
 ```
 
 ## Quick start
 
 ```bash
-mongo-docker setup     # install Docker (first time only)
-mongo-docker           # open the interactive TUI
-mongo-docker connect   # connect to a container from the CLI
+mongostage setup     # install Docker (first time only)
+mongostage           # open the interactive TUI
+mongostage connect   # connect to a container from the CLI
 ```
 
 ---
 
 ## Interactive TUI
 
-Running `mongo-docker` with no arguments opens an interactive terminal UI. Two pages, navigated with `Tab`:
+Running `mongostage` with no arguments opens an interactive terminal UI. Two pages, navigated with `Tab`:
 
 - **Images** — Browse available images, filter by category (`← →`), search by typing, launch with `Enter`
 - **Containers** — View running and stopped containers, stop/start/remove/shell in from a menu
@@ -47,21 +47,21 @@ Running `mongo-docker` with no arguments opens an interactive terminal UI. Two p
 
 All images run as a non-root `mongo` user and include a Starship prompt.
 
-Use the short tag with any command — `node-shell-claude` not the full `timatmongodb/mongo-docker:node-shell-claude`.
+Use the short tag with any command — `node-shell-claude` not the full `timatmongodb/mongostage:node-shell-claude`.
 
 ---
 
 ## Commands
 
-### `mongo-docker connect [image]`
+### `mongostage connect [image]`
 
 Pull and attach to a MongoDB environment. Creates a new container or reattaches to an existing one.
 
 ```bash
-mongo-docker connect                     # pick image interactively
-mongo-docker connect node-shell-claude   # connect directly
-mongo-docker connect node-shell --fresh  # remove any existing container first
-mongo-docker connect node-shell --name my-env  # custom container name
+mongostage connect                     # pick image interactively
+mongostage connect node-shell-claude   # connect directly
+mongostage connect node-shell --fresh  # remove any existing container first
+mongostage connect node-shell --name my-env  # custom container name
 ```
 
 Options:
@@ -74,41 +74,41 @@ Options:
 
 ---
 
-### `mongo-docker list`
+### `mongostage list`
 
 List all available images from the registry.
 
 ```bash
-mongo-docker list                   # all images
-mongo-docker list --filter ai       # only AI images
-mongo-docker list --filter runtime  # Node + Python images
+mongostage list                   # all images
+mongostage list --filter ai       # only AI images
+mongostage list --filter runtime  # Node + Python images
 ```
 
 Categories: `base`, `shell`, `server`, `runtime`, `ai`
 
 ---
 
-### `mongo-docker env`
+### `mongostage env`
 
-Manage credentials that get injected as environment variables into every container. Stored at `~/.mongo-docker/.env`.
+Manage credentials that get injected as environment variables into every container. Stored at `~/.mongostage/.env`.
 
 ```bash
-mongo-docker env set ANTHROPIC_API_KEY=sk-ant-...   # add or overwrite a key
-mongo-docker env list                                # list all keys (values masked)
-mongo-docker env remove ANTHROPIC_API_KEY            # remove one key
-mongo-docker env clear                               # remove all keys (prompts first)
+mongostage env set ANTHROPIC_API_KEY=sk-ant-...   # add or overwrite a key
+mongostage env list                                # list all keys (values masked)
+mongostage env remove ANTHROPIC_API_KEY            # remove one key
+mongostage env clear                               # remove all keys (prompts first)
 ```
 
 **Key format:** must match `/^[A-Z_][A-Z0-9_]*$/i` — letters, digits, underscores only. Values cannot contain newlines.
 
 ---
 
-### `mongo-docker setup`
+### `mongostage setup`
 
 Install Docker on this machine. Safe to re-run; detects if Docker is already running.
 
 ```bash
-mongo-docker setup
+mongostage setup
 ```
 
 What it does per platform:
@@ -119,53 +119,53 @@ What it does per platform:
 | macOS | Installs Colima + Docker via Homebrew |
 | Windows (native) | Installs Docker Desktop via winget |
 
-> **macOS:** Homebrew must be installed before running `mongo-docker setup`. Get it at https://brew.sh
+> **macOS:** Homebrew must be installed before running `mongostage setup`. Get it at https://brew.sh
 
 ---
 
-### `mongo-docker status`
+### `mongostage status`
 
-Show all mongo-docker containers and disk usage.
+Show all MongoStage containers and disk usage.
 
 ```bash
-mongo-docker status
+mongostage status
 ```
 
 ---
 
-### `mongo-docker start [image]`
+### `mongostage start [image]`
 
 Start a stopped container.
 
 ```bash
-mongo-docker start                  # pick from stopped containers
-mongo-docker start node-shell       # start by slug
-mongo-docker start node-shell --attach  # start and attach to bash
+mongostage start                  # pick from stopped containers
+mongostage start node-shell       # start by slug
+mongostage start node-shell --attach  # start and attach to bash
 ```
 
 ---
 
-### `mongo-docker stop [image]`
+### `mongostage stop [image]`
 
 Stop a running container.
 
 ```bash
-mongo-docker stop                   # pick from running containers
-mongo-docker stop node-shell        # stop by slug
-mongo-docker stop --all             # stop all running mongo-docker containers
+mongostage stop                   # pick from running containers
+mongostage stop node-shell        # stop by slug
+mongostage stop --all             # stop all running MongoStage containers
 ```
 
 ---
 
-### `mongo-docker run [image]`
+### `mongostage run [image]`
 
 Run a container in detached mode (background). Useful for dev servers and CI.
 
 ```bash
-mongo-docker run node-shell
-mongo-docker run server-shell --port 27017:27017
-mongo-docker run node-shell --mount ~/myproject
-mongo-docker run node-shell --env /path/to/custom.env
+mongostage run node-shell
+mongostage run server-shell --port 27017:27017
+mongostage run node-shell --mount ~/myproject
+mongostage run node-shell --env /path/to/custom.env
 ```
 
 Options:
@@ -174,31 +174,31 @@ Options:
 |------|-------------|
 | `--port <mapping>` | Port mapping, e.g. `27017:27017` |
 | `--mount <path>` | Mount a host directory at `/home/mongo/myproject` |
-| `--env <file>` | Load env vars from a specific file instead of `~/.mongo-docker/.env` |
+| `--env <file>` | Load env vars from a specific file instead of `~/.mongostage/.env` |
 
 ---
 
-### `mongo-docker remove [image]`
+### `mongostage remove [image]`
 
 Remove a container.
 
 ```bash
-mongo-docker remove                     # pick from stopped containers
-mongo-docker remove node-shell          # remove by slug
-mongo-docker remove node-shell --force  # stop and remove even if running
-mongo-docker remove --all               # remove all stopped containers
+mongostage remove                     # pick from stopped containers
+mongostage remove node-shell          # remove by slug
+mongostage remove node-shell --force  # stop and remove even if running
+mongostage remove --all               # remove all stopped containers
 ```
 
 ---
 
-### `mongo-docker clean`
+### `mongostage clean`
 
-Remove all stopped mongo-docker containers at once.
+Remove all stopped MongoStage containers at once.
 
 ```bash
-mongo-docker clean             # remove stopped containers (prompts first)
-mongo-docker clean --force     # remove all, running or not
-mongo-docker clean --images    # also remove pulled Docker images
+mongostage clean             # remove stopped containers (prompts first)
+mongostage clean --force     # remove all, running or not
+mongostage clean --images    # also remove pulled Docker images
 ```
 
 ---
@@ -218,9 +218,9 @@ All commands accept:
 
 ## Configuration files
 
-### `~/.mongo-docker/.env` — credentials
+### `~/.mongostage/.env` — credentials
 
-Env vars injected into every container at connect/run time. Managed via `mongo-docker env`.
+Env vars injected into every container at connect/run time. Managed via `mongostage env`.
 
 ```
 ANTHROPIC_API_KEY=sk-ant-...
@@ -240,9 +240,9 @@ MONGO_WORKDIR=/home/mongo/myproject
 
 File permissions are set to `0600` (owner read/write only).
 
-### `~/.mongo-docker/config.json` — CLI state
+### `~/.mongostage/config.json` — CLI state
 
-Auto-created and updated by `mongo-docker setup`. You do not normally edit this file by hand.
+Auto-created and updated by `mongostage setup`. You do not normally edit this file by hand.
 
 ```json
 {
@@ -261,15 +261,15 @@ Auto-created and updated by `mongo-docker setup`. You do not normally edit this 
 | `dockerMethod` | `engine`, `colima` | How Docker is installed |
 | `defaultOrg` | string | Docker Hub org prefix for images |
 
-The config directory can be overridden with the `MONGO_DOCKER_CONFIG_DIR` environment variable.
+The config directory can be overridden with the `MONGOSTAGE_CONFIG_DIR` environment variable.
 
 ---
 
 ## Platform notes
 
-**macOS** — Homebrew is required before running `mongo-docker setup`. Docker runs via [Colima](https://github.com/abiosoft/colima), a lightweight VM. The setup command installs both automatically once Homebrew is present.
+**macOS** — Homebrew is required before running `mongostage setup`. Docker runs via [Colima](https://github.com/abiosoft/colima), a lightweight VM. The setup command installs both automatically once Homebrew is present.
 
-**WSL2** — Runs as Linux. `MONGO_MOUNT` in `~/.mongo-docker/.env` must be a WSL2 path (e.g. `~/project`), not a Windows path (`C:\Users\...`). mongo-docker will reject Windows paths with a clear error.
+**WSL2** — Runs as Linux. `MONGO_MOUNT` in `~/.mongostage/.env` must be a WSL2 path (e.g. `~/project`), not a Windows path (`C:\Users\...`). MongoStage will reject Windows paths with a clear error.
 
 **Windows native** — Docker Desktop is installed via winget. A machine restart may be required before Docker is usable.
 

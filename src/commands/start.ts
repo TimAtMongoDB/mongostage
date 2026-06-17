@@ -26,7 +26,7 @@ export async function startCommand(
 ): Promise<void> {
   const state = await detectDockerState();
   if (state !== 'running') {
-    console.error(chalk.red('Docker is not running. Run `mongo-docker setup` to install it.'));
+    console.error(chalk.red('Docker is not running. Run `mongostage setup` to install it.'));
     process.exit(1);
   }
 
@@ -37,7 +37,7 @@ export async function startCommand(
     const stopped = containers.filter(c => c.status !== 'running');
 
     if (stopped.length === 0) {
-      console.log('No stopped mongo-docker containers.');
+      console.log('No stopped mongostage containers.');
       return;
     }
 
@@ -71,7 +71,7 @@ export async function startCommand(
 
   const container = await findContainerBySlug(slug);
   if (!container) {
-    console.error(chalk.red(`No stopped container found. Run \`mongo-docker connect ${slug}\` to create one.`));
+    console.error(chalk.red(`No stopped container found. Run \`mongostage connect ${slug}\` to create one.`));
     process.exit(1);
   }
   if (container.status === 'running') {

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { createInterface } from 'node:readline/promises';
 
-const ENV_DIR = join(homedir(), '.mongo-docker');
+const ENV_DIR = join((homedir(), '.mongostage'));
 const ENV_FILE = join(ENV_DIR, '.env');
 
 const KEY_PATTERN = /^[A-Z_][A-Z0-9_]*$/i;
@@ -44,7 +44,7 @@ function writeEnvLines(lines: string[]): void {
 export async function envSetCommand(entry: string): Promise<void> {
   const eqIndex = entry.indexOf('=');
   if (eqIndex <= 0) {
-    console.error('Invalid format. Use: mongo-docker env set KEY=VALUE');
+    console.error('Invalid format. Use: mongostage env set KEY=VALUE');
     process.exit(1);
   }
 
@@ -77,7 +77,7 @@ export async function envListCommand(): Promise<void> {
   const entries = lines.filter(l => l.trim() && !l.startsWith('#'));
 
   if (entries.length === 0) {
-    console.log('No variables set. Use `mongo-docker env set KEY=VALUE`.');
+    console.log('No variables set. Use `mongostage env set KEY=VALUE`.');
     return;
   }
 
