@@ -107,6 +107,11 @@ async function renderLaunchScreen(opts: LaunchMocks = {}) {
     attachToContainer: vi.fn(async () => {}),
   }));
 
+  const mockAppendLaunchError = vi.fn();
+  vi.doMock('../../src/lib/log.js', () => ({
+    appendLaunchError: mockAppendLaunchError,
+  }));
+
   const React = (await import('react')).default;
   const { render } = await import('ink');
   const { LaunchScreen } = await import('../../src/tui/LaunchScreen.js');
@@ -154,7 +159,7 @@ async function renderLaunchScreen(opts: LaunchMocks = {}) {
     return '';
   }
 
-  return { instance, lastFrame, onComplete, onError };
+  return { instance, lastFrame, onComplete, onError, stdin, mockAppendLaunchError };
 }
 
 describe('LaunchScreen', () => {
@@ -222,12 +227,16 @@ describe('LaunchScreen', () => {
       instance.unmount();
     });
 
-    it('should call onError on pull failure', async () => {
-      const { onError, instance } = await renderLaunchScreen({
+    it('should call onError on pull failure after keypress', async () => {
+      const { onError, stdin, instance } = await renderLaunchScreen({
         dockerState: 'running',
         pullFails: true,
       });
       await new Promise(r => setTimeout(r, 200));
+      // Error screen stays until keypress — onError must not be called yet
+      expect(onError).not.toHaveBeenCalled();
+      stdin.write('a');
+      await new Promise(r => setTimeout(r, 100));
       expect(onError).toHaveBeenCalled();
       instance.unmount();
     });
@@ -256,6 +265,84 @@ describe('LaunchScreen', () => {
       const frame = lastFrame();
       expect(frame).toContain('✗');
       instance.unmount();
+    });
+  });
+
+  describe('error UX - keypress required to dismiss', () => {
+    it('should show "Press any key to go back" prompt after an error', async () => {
+      const { lastFrame, instance } = await renderLaunchScreen({
+        dockerState: 'running',
+        pullFails: true,
+      });
+      await new Promise(r => setTimeout(r, 200));
+      expect(lastFrame()).toContain('Press any key to go back');
+      instance.unmount();
+    });
+
+    it('should NOT call onError before a key is pressed', async () => {
+      const { onError, instance } = await renderLaunchScreen({
+        dockerState: 'running',
+        pullFails: true,
+      });
+      await new Promise(r => setTimeout(r, 200));
+      expect(onError).not.toHaveBeenCalled();
+      instance.unmount();
+    });
+
+    it('should call onError after a key is pressed on the error screen', async () => {
+      const { onError, stdin, instance } = await renderLaunchScreen({
+        dockerState: 'running',
+        pullFails: true,
+      });
+      await new Promise(r => setTimeout(r, 200));
+      stdin.write('a');
+      await new Promise(r => setTimeout(r, 100));
+      expect(onError).toHaveBeenCalled();
+      instance.unmount();
+    });
+  });
+
+  describe('error logging', () => {
+    it('should write an entry to ~/.mongostage/logs/mongostage.log on error', async () => {
+      const { mockAppendLaunchError, instance } = await renderLaunchScreen({
+        dockerState: 'running',
+        pullFails: true,
+      });
+      await new Promise(r => setTimeout(r, 200));
+      expect(mockAppendLaunchError).toHaveBeenCalled();
+      instance.unmount();
+    });
+
+    it('should include timestamp, image tag, step label, and error message in the log entry', async () => {
+      const { mockAppendLaunchError, instance } = await renderLaunchScreen({
+        dockerState: 'running',
+        pullFails: true,
+      });
+      await new Promise(r => setTimeout(r, 200));
+      const [imageTag, stepLabel, error] = mockAppendLaunchError.mock.calls[0];
+      expect(imageTag).toBe(SAMPLE_IMAGE.tag);
+      expect(stepLabel).toBe('Pulling image');
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain('pull: network error');
+      instance.unmount();
+    });
+
+    it('should not throw if the log directory does not exist (creates it)', async () => {
+      vi.doMock('node:fs', () => ({
+        mkdirSync: vi.fn(),
+        appendFileSync: vi.fn(),
+      }));
+      const { appendLaunchError } = await import('../../src/lib/log.js');
+      expect(() => appendLaunchError('tag:v1', 'Pulling image', new Error('test'))).not.toThrow();
+    });
+
+    it('should silently ignore log write failures and still show the error screen', async () => {
+      vi.doMock('node:fs', () => ({
+        mkdirSync: vi.fn(() => { throw new Error('EACCES: permission denied'); }),
+        appendFileSync: vi.fn(),
+      }));
+      const { appendLaunchError } = await import('../../src/lib/log.js');
+      expect(() => appendLaunchError('tag:v1', 'Pulling image', new Error('test'))).not.toThrow();
     });
   });
 });

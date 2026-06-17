@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
 import type { ImageConfig } from '../types/image.js';
 import { detectDockerState, pullImage, runContainer, startContainer, getDockerClient } from '../lib/docker.js';
 import { findContainerBySlug, getContainerName, getSlugFromTag } from '../lib/containers.js';
 import { attachToContainer } from '../commands/connect.js';
 import type { RunContainerOpts } from '../types/container.js';
+import { appendLaunchError } from '../lib/log.js';
 
 type StepState = 'pending' | 'active' | 'complete' | 'skipped' | 'error';
 
@@ -79,9 +80,21 @@ function StepRow({ step }: { step: Step }): JSX.Element {
 
 export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps): JSX.Element {
   const [steps, setSteps] = useState<Step[]>(initialSteps);
+  const [errored, setErrored] = useState(false);
+  const [capturedError, setCapturedError] = useState<Error | null>(null);
+
+  useInput((_input, _key) => {
+    if (capturedError) onError(capturedError);
+  }, { isActive: errored });
 
   function updateStep(idx: number, state: StepState, note?: string): void {
     setSteps(prev => prev.map((s, i) => i === idx ? { ...s, state, note } : s));
+  }
+
+  function triggerError(stepIdx: number, err: Error): void {
+    appendLaunchError(image.tag, STEP_LABELS[stepIdx], err);
+    setCapturedError(err);
+    setErrored(true);
   }
 
   // Empty deps intentional: this effect runs exactly once on mount to drive the launch sequence
@@ -100,7 +113,7 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         updateStep(0, 'complete');
       } catch (err) {
         updateStep(0, 'error', errMsg(err));
-        onError(toError(err));
+        triggerError(0, toError(err));
         return;
       }
 
@@ -110,7 +123,7 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
       } else {
         updateStep(1, 'active');
         updateStep(1, 'error', 'Docker is not running. Run `mongostage setup` to install it.');
-        onError(new Error('Docker is not running'));
+        triggerError(1, new Error('Docker is not running'));
         return;
       }
 
@@ -122,7 +135,7 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         updateStep(2, 'complete', pullNote || undefined);
       } catch (err) {
         updateStep(2, 'error', errMsg(err));
-        onError(toError(err));
+        triggerError(2, toError(err));
         return;
       }
 
@@ -151,14 +164,14 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
           const info = await docker.getContainer(containerName).inspect();
           if (!info.State.Running) {
             updateStep(3, 'error', `Container exited immediately. Run \`docker logs ${containerName}\` to see what happened.`);
-            onError(new Error('Container exited immediately after start'));
+            triggerError(3, new Error('Container exited immediately after start'));
             return;
           }
           updateStep(3, 'complete');
         }
       } catch (err) {
         updateStep(3, 'error', errMsg(err));
-        onError(toError(err));
+        triggerError(3, toError(err));
         return;
       }
 
@@ -173,7 +186,7 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
           updateStep(4, 'complete');
         } catch (err) {
           updateStep(4, 'error', `Container stopped unexpectedly. Run \`docker logs ${containerName}\` for details.`);
-          onError(toError(err));
+          triggerError(4, toError(err));
           return;
         }
       }
@@ -186,12 +199,12 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         if (alive) onComplete();
       } catch (err) {
         updateStep(5, 'error', errMsg(err));
-        onError(toError(err));
+        triggerError(5, toError(err));
       }
     }
 
     run().catch(err => {
-      if (alive) onError(toError(err));
+      if (alive) triggerError(0, toError(err));
     });
 
     return () => { alive = false; };
@@ -208,6 +221,11 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         {steps.map((step, i) => (
           <StepRow key={i} step={step} />
         ))}
+        {errored && (
+          <Box marginTop={1}>
+            <Text dimColor>Press any key to go back</Text>
+          </Box>
+        )}
       </Box>
     </Box>
   );
