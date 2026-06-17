@@ -97,6 +97,10 @@ export async function connectCommand(
   const mongoMount = envVars['MONGO_MOUNT'];
   const mongoWorkdir = envVars['MONGO_WORKDIR'];
 
+  if (!envVars['TZ']) {
+    console.log(chalk.yellow("Tip: set a timezone with 'mongostage timezone set <tz>' so container time is correct."));
+  }
+
   if (mongoMount && detectPlatform() === 'wsl2' && isWindowsPath(mongoMount)) {
     console.error(
       chalk.red('MONGO_MOUNT must be a WSL2 path (e.g. ~/myproject), not a Windows path (e.g. C:\\Users\\...).')
