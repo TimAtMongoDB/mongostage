@@ -9,17 +9,9 @@ MongoDB-branded Docker environments for demos, workshops, and content creation. 
 
 ## Install
 
-MongoStage is published to GitHub Packages. Add the registry to your `.npmrc` once, then install:
-
 ```bash
-echo "@timatmongodb:registry=https://npm.pkg.github.com" >> ~/.npmrc
-npm install -g @timatmongodb/mongostage
+npm install -g mongostage
 ```
-
-> You will need a GitHub personal access token with `read:packages` scope to install from GitHub Packages. Add it to `~/.npmrc`:
-> ```
-> //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
-> ```
 
 ## Quick start
 
