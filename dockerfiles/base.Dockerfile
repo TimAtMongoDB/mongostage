@@ -26,7 +26,7 @@ ENV STARSHIP_CONFIG=/etc/mongodb/starship.toml
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       locales \
-      tput \
+      ncurses-bin \
       bash \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* && \

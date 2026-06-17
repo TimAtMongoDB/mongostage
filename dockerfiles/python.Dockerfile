@@ -9,5 +9,5 @@ RUN apt-get update && \
       git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* && \
-    pip3 install --no-cache-dir pymongo motor
+    pip3 install --no-cache-dir --break-system-packages pymongo motor
 USER mongo
