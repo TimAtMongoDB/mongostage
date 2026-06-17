@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { fileURLToPath } from 'node:url';
+import { realpathSync } from 'node:fs';
 import { Command } from 'commander';
 
 process.on('unhandledRejection', (reason, promise) => {
@@ -181,8 +182,9 @@ export function createProgram(): Command {
   return program;
 }
 
-// Only execute when this file is the entry point, not when imported as a module
-const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+// Only execute when this file is the entry point, not when imported as a module.
+// realpathSync resolves symlinks so npm link / global installs work correctly.
+const isMain = realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
 
 if (isMain) {
   const args = process.argv.slice(2);
