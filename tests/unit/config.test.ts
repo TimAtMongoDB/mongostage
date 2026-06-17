@@ -75,7 +75,7 @@ describe('getCliConfig()', () => {
   });
 
   it('should return defaults when config directory does not exist', async () => {
-    process.env.MONGOSTAGE_CONFIG_DIR = '/nonexistent-mongo-docker-test-dir-xyz';
+    process.env.MONGOSTAGE_CONFIG_DIR = '/nonexistent-mongostage-test-dir-xyz';
     const { getCliConfig } = await import('../../src/lib/config.js');
     const config = getCliConfig();
     expect(config).toBeDefined();

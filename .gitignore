@@ -25,3 +25,5 @@ MDs/
 
 # Temporary AI research files
 _ai_temp/
+
+.playwright-mcp/
