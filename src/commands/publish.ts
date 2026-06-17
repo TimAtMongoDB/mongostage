@@ -10,7 +10,6 @@ const execFileAsync = promisify(execFile);
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const PACKAGE_ROOT = join(__dirname, '../../');
 const PACKAGE_JSON_PATH = join(PACKAGE_ROOT, 'package.json');
-const REGISTRY_URL = 'https://npm.pkg.github.com';
 
 import { PreflightError } from '../lib/errors.js';
 
@@ -65,10 +64,10 @@ async function spawnStream(
 }
 
 async function preflight(newVersion: string, packageName: string): Promise<void> {
-  // 1. GITHUB_TOKEN must be set
-  if (!process.env['GITHUB_TOKEN']) {
+  // 1. MONGODB_NPM_TOKEN must be set
+  if (!process.env['MONGODB_NPM_TOKEN']) {
     throw new PreflightError(
-      'GITHUB_TOKEN is not set. Export a GitHub token with write:packages scope.'
+      'MONGODB_NPM_TOKEN is not set. Export your npm token before publishing.'
     );
   }
 
@@ -87,16 +86,16 @@ async function preflight(newVersion: string, packageName: string): Promise<void>
     // git not available or not a repo — skip this check
   }
 
-  // 3. Version must not already exist on GitHub Packages
+  // 3. Version must not already exist on npm
   try {
     const { stdout } = await execFileAsync(
       'npm',
-      ['view', `${packageName}@${newVersion}`, 'version', '--registry', REGISTRY_URL],
-      { env: { ...process.env, NODE_AUTH_TOKEN: process.env['GITHUB_TOKEN'] } }
+      ['view', `${packageName}@${newVersion}`, 'version'],
+      { env: { ...process.env, NODE_AUTH_TOKEN: process.env['MONGODB_NPM_TOKEN'] } }
     );
     if (stdout.trim()) {
       throw new PreflightError(
-        `Version ${newVersion} already exists on GitHub Packages. Choose a higher version.`
+        `Version ${newVersion} already exists on npm. Choose a higher version.`
       );
     }
   } catch (err) {
@@ -183,12 +182,12 @@ export async function publishCommand(opts: {
     throw err;
   }
 
-  console.log('✓  GITHUB_TOKEN is set');
+  console.log('✓  MONGODB_NPM_TOKEN is set');
   console.log('✓  images.json is clean');
-  console.log(`✓  Version ${newVersion} is available on GitHub Packages\n`);
+  console.log(`✓  Version ${newVersion} is available on npm\n`);
 
   if (opts.dryRun) {
-    console.log(`[dry-run] Would publish ${packageName}@${newVersion} to ${REGISTRY_URL}`);
+    console.log(`[dry-run] Would publish ${packageName}@${newVersion} to https://registry.npmjs.org`);
     console.log('[dry-run] No files written, no publish performed.');
     return;
   }
@@ -207,14 +206,14 @@ export async function publishCommand(opts: {
   }
   console.log('✓  TypeScript compiled\n');
 
-  // Publish to GitHub Packages
+  // Publish to npm
   console.log(`Publishing ${packageName}@${newVersion} ...`);
-  await spawnStream('npm', ['publish', '--access', 'restricted'], {
+  await spawnStream('npm', ['publish', '--access', 'public'], {
     ...process.env,
-    NODE_AUTH_TOKEN: process.env['GITHUB_TOKEN'],
+    NODE_AUTH_TOKEN: process.env['MONGODB_NPM_TOKEN'],
   });
 
-  console.log(`\n✓  Published ${packageName}@${newVersion} to GitHub Packages`);
+  console.log(`\n✓  Published ${packageName}@${newVersion} to npm`);
   console.log('\nDon\'t forget:');
   console.log(`  git tag v${newVersion}`);
   console.log(`  git push origin v${newVersion}`);
