@@ -4,7 +4,6 @@ import Spinner from 'ink-spinner';
 import type { ImageConfig } from '../types/image.js';
 import { detectDockerState, pullImage, runContainer, startContainer, getDockerClient, getContainerLogs } from '../lib/docker.js';
 import { findContainerBySlug, getContainerName, getSlugFromTag } from '../lib/containers.js';
-import { attachToContainer } from '../commands/connect.js';
 import type { RunContainerOpts } from '../types/container.js';
 import { appendLaunchError } from '../lib/log.js';
 
@@ -18,7 +17,7 @@ interface Step {
 
 interface LaunchScreenProps {
   image: ImageConfig;
-  onComplete: () => void;
+  onComplete: (containerName: string) => void;
   onError: (error: Error) => void;
 }
 
@@ -196,16 +195,10 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         }
       }
 
-      // Step 6: Connect
+      // Step 6: Connect — Ink must exit before attaching; signal caller with container name
       updateStep(5, 'active');
-      try {
-        await attachToContainer(containerName);
-        updateStep(5, 'complete');
-        if (alive) onComplete();
-      } catch (err) {
-        updateStep(5, 'error', errMsg(err));
-        triggerError(5, toError(err));
-      }
+      updateStep(5, 'complete');
+      if (alive) onComplete(containerName);
     }
 
     run().catch(err => {

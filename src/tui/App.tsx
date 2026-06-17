@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
 import { type ImageConfig } from '../types/image.js';
 import { PageTabs, type ActivePage } from './PageTabs.js';
@@ -9,13 +9,19 @@ import { Logo } from './Logo.js';
 
 interface AppProps {
   images: ImageConfig[];
+  onContainerReady?: (containerName: string) => void;
 }
 
-export default function App({ images }: AppProps): JSX.Element {
+export default function App({ images, onContainerReady }: AppProps): JSX.Element {
   const { exit } = useApp();
   const [activePage, setActivePage] = useState<ActivePage>('images');
   const [footerLine1, setFooterLine1] = useState('↑↓ navigate   ←→ filter   Enter launch   Esc quit');
   const [launchImage, setLaunchImage] = useState<ImageConfig | null>(null);
+
+  // Clear terminal when entering launch screen so old App content doesn't bleed through
+  useEffect(() => {
+    if (launchImage) process.stdout.write('\x1B[2J\x1B[H');
+  }, [launchImage]);
 
   useInput((_input, key) => {
     if (launchImage) return;
@@ -39,7 +45,7 @@ export default function App({ images }: AppProps): JSX.Element {
     return (
       <LaunchScreen
         image={launchImage}
-        onComplete={() => { exit(); }}
+        onComplete={(containerName) => { onContainerReady?.(containerName); exit(); }}
         onError={() => { setLaunchImage(null); }}
       />
     );

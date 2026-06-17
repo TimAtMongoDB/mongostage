@@ -215,7 +215,19 @@ if (isMain) {
     const { default: React } = await import('react');
     const { render } = await import('ink');
     const { getImages } = await import('./lib/config.js');
-    render(React.createElement(App, { images: getImages() }));
+
+    let containerToAttach: string | null = null;
+    const { waitUntilExit } = render(React.createElement(App, {
+      images: getImages(),
+      onContainerReady: (name: string) => { containerToAttach = name; },
+    }));
+
+    await waitUntilExit();
+
+    if (containerToAttach) {
+      const { attachToContainer } = await import('./commands/connect.js');
+      await attachToContainer(containerToAttach);
+    }
   } else {
     const program = createProgram();
     try {
