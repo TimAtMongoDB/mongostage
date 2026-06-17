@@ -1,7 +1,7 @@
 # Component fragment: Grok Build CLI
 # Requires a node-capable base layer (FROM must include Node.js)
-# FROM resolved by build command - only valid on node-* images
+# Installed via xAI's official install script
 
 USER root
-RUN npm install -g @xai-org/grok-build || npm install -g grok-build
+RUN curl -fsSL https://x.ai/cli/install.sh | bash
 USER mongo
