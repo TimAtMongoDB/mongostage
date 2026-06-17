@@ -1,5 +1,5 @@
 {
-  "name": "@timatmongodb/mongostage",
+  "name": "mongostage",
   "version": "0.1.0",
   "description": "MongoDB-branded Docker environments — spawn a stage for demos, workshops, and content creation",
   "type": "module",
@@ -14,9 +14,6 @@
     "assets/",
     "images.json"
   ],
-  "publishConfig": {
-    "@timatmongodb:registry": "https://npm.pkg.github.com"
-  },
   "scripts": {
     "build": "tsc && chmod +x dist/index.js",
     "typecheck": "tsc --noEmit",

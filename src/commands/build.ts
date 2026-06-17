@@ -235,6 +235,6 @@ async function _push(fullTag: string, shortTag: string): Promise<void> {
   console.log('\nDon\'t forget:');
   console.log('  1. Add/update the entry in images.json if new');
   console.log('  2. Run npm publish');
-  console.log(`  Users will see the new image on next: npm update -g @timatmongodb/mongostage`);
+  console.log(`  Users will see the new image on next: npm update -g mongostage`);
   void shortTag;
 }

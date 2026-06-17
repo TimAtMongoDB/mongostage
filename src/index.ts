@@ -171,7 +171,7 @@ export function createProgram(): Command {
 
   program
     .command('publish')
-    .description('(admin) Bump version, build, and publish to GitHub Packages')
+    .description('(admin) Bump version, build, and publish to npm')
     .option('--bump <type>', 'version bump type: patch, minor, major, or semver string')
     .option('--dry-run', 'show what would be published without publishing')
     .action(async (opts: { bump?: string; dryRun?: boolean }) => {

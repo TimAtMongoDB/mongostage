@@ -1,14 +1,14 @@
 import { describe, it } from 'vitest';
 
 // Integration tests for the publish command.
-// These tests require GITHUB_TOKEN to be set and will publish to GitHub Packages.
+// These tests require MONGODB_NPM_TOKEN to be set and will publish to npm.
 // Run manually before each release; do not run in CI automatically.
 
 describe('publish command', () => {
   describe('pre-flight checks', () => {
-    it.skip('should fail when GITHUB_TOKEN is not set', () => { /* MDD skeleton */ });
+    it.skip('should fail when MONGODB_NPM_TOKEN is not set', () => { /* MDD skeleton */ });
     it.skip('should fail when images.json has uncommitted changes', () => { /* MDD skeleton */ });
-    it.skip('should fail when the target version already exists on GitHub Packages', () => { /* MDD skeleton */ });
+    it.skip('should fail when the target version already exists on npm', () => { /* MDD skeleton */ });
   });
 
   describe('version bumping', () => {
