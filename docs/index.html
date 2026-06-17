@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MongoStage - MongoDB Docker Environments</title>
+
+  <!-- SEO -->
+  <meta name="description" content="MongoStage - MongoDB-branded Docker environments for demos, workshops, and content creation. Full terminal UI and CLI for managing containers." />
+  <meta name="keywords" content="MongoStage, MongoDB, Docker, containers, CLI, TUI, terminal, demos, workshops" />
+  <meta name="author" content="MongoDB" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="MongoStage - MongoDB Docker Environments" />
+  <meta property="og:description" content="MongoDB-branded Docker environments for demos, workshops, and content creation." />
+  <meta property="og:image" content="mongostage_hero.webp" />
+
+  <!-- Favicon: MongoDB leaf green "M" -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2308090f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='system-ui%2C sans-serif' font-size='18' font-weight='800' fill='%2300ed64'%3EM%3C/text%3E%3C/svg%3E" />
+
+  <!-- Prism.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <!-- Site Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Fixed Header -->
+  <header>
+    <nav class="container">
+      <ul>
+        <li>
+          <button
+            class="menu-toggle"
+            id="menu-toggle"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+          >
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+          </button>
+        </li>
+        <li>
+          <div class="brand">
+            <span class="brand-text">
+              <span class="brand-title">MongoStage</span>
+              <span class="brand-author">by <a href="https://github.com/timatmongodb" target="_blank" rel="noopener">timatmongodb</a></span>
+            </span>
+          </div>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <a href="https://github.com/timatmongodb/mongostage" target="_blank" rel="noopener">GitHub</a>
+        </li>
+        <li>
+          <a href="https://www.npmjs.com/package/mongostage" target="_blank" rel="noopener">npm</a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="mobile-menu-overlay" aria-hidden="true"></div>
+
+  <!-- Mobile Menu Drawer -->
+  <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation">
+    <div class="mobile-toc">
+      <p class="toc-header">On this page</p>
+      <a href="#install">Install</a>
+      <a href="#quick-start">Quick Start</a>
+      <a href="#tui">Interactive TUI</a>
+      <a href="#images">Available Images</a>
+      <a href="#commands">Commands</a>
+      <a href="#global-flags">Global Flags</a>
+      <a href="#configuration">Configuration</a>
+      <a href="#platform-notes">Platform Notes</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-content container">
+      <div class="hero-badge">npm install -g mongostage</div>
+      <h1>MongoStage</h1>
+      <p class="hero-subtitle">
+        MongoDB-branded Docker environments for demos, workshops, and content creation.
+        Full terminal UI and CLI for managing containers across Linux, macOS, and Windows.
+      </p>
+      <div class="hero-actions">
+        <a href="#install" class="btn btn-primary">Get Started &rarr;</a>
+        <a href="https://github.com/timatmongodb/mongostage" target="_blank" rel="noopener" class="btn btn-secondary">View on GitHub</a>
+      </div>
+    </div>
+    <div class="hero-banner">
+      <img
+        src="mongostage_hero.webp"
+        alt="MongoStage hero image"
+        width="2752"
+        loading="eager"
+      />
+    </div>
+  </section>
+
+  <!-- Main Layout -->
+  <div class="main-layout container">
+
+    <!-- Sidebar TOC -->
+    <aside id="sidebar" aria-label="Table of contents">
+      <p class="toc-header">On this page</p>
+      <nav id="toc">
+        <a href="#install">Install</a>
+        <a href="#quick-start">Quick Start</a>
+        <a href="#tui">Interactive TUI</a>
+        <a href="#images">Available Images</a>
+        <a href="#commands">Commands</a>
+        <a href="#global-flags">Global Flags</a>
+        <a href="#configuration">Configuration</a>
+        <a href="#platform-notes">Platform Notes</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="content">
+
+      <!-- Install -->
+      <section id="install">
+        <h2>Install</h2>
+
+        <p><strong>Requirements:</strong> Node.js &gt;= 22. Docker is not required upfront &mdash; <code>mongostage setup</code> installs it for you.</p>
+
+        <pre><code class="language-bash">npm install -g mongostage</code></pre>
+      </section>
+
+      <!-- Quick Start -->
+      <section id="quick-start">
+        <h2>Quick Start</h2>
+
+        <pre><code class="language-bash">mongostage setup     # install Docker (first time only)
+mongostage           # open the interactive TUI
+mongostage connect   # connect to a container from the CLI</code></pre>
+      </section>
+
+      <!-- TUI -->
+      <section id="tui">
+        <h2>Interactive TUI</h2>
+
+        <p>
+          Running <code>mongostage</code> with no arguments opens an interactive terminal UI.
+          Two pages, navigated with <code>Tab</code>:
+        </p>
+
+        <ul>
+          <li><strong>Images</strong> &mdash; Browse available images, filter by category (<code>&larr; &rarr;</code>), search by typing, launch with <code>Enter</code></li>
+          <li><strong>Containers</strong> &mdash; View running and stopped containers, stop/start/remove/shell in from a menu</li>
+        </ul>
+
+        <div class="screenshot">
+          <img
+            src="screenshots/mongostage_tui.webp"
+            alt="MongoStage TUI showing the images page with category filters and container list"
+            width="1593"
+            loading="lazy"
+          />
+        </div>
+      </section>
+
+      <!-- Available Images -->
+      <section id="images">
+        <h2>Available Images</h2>
+
+        <p>All images run as a non-root <code>mongo</code> user and include a Starship prompt. Use the short tag with any command &mdash; <code>node-shell-claude</code>, not the full <code>timatmongodb/mongostage:node-shell-claude</code>.</p>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tag</th>
+              <th>Components</th>
+              <th>Category</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>base</td>
+              <td>base</td>
+              <td>base</td>
+              <td>Ubuntu 24.04 LTS with MongoDB-branded terminal</td>
+            </tr>
+            <tr>
+              <td>shell</td>
+              <td>base, shell</td>
+              <td>shell</td>
+              <td>base + mongosh, mongoimport, mongoexport, mongodump</td>
+            </tr>
+            <tr>
+              <td>server-shell</td>
+              <td>base, server, shell</td>
+              <td>server</td>
+              <td>MongoDB Community Server 8.0 + full shell tooling</td>
+            </tr>
+            <tr>
+              <td>node-shell</td>
+              <td>base, shell, node</td>
+              <td>runtime</td>
+              <td>Node.js 22 LTS + mongosh + shell tools</td>
+            </tr>
+            <tr>
+              <td>node-shell-claude</td>
+              <td>base, shell, node, claude</td>
+              <td>ai</td>
+              <td>Node.js 22 LTS + mongosh + Claude Code CLI</td>
+            </tr>
+            <tr>
+              <td>python-shell</td>
+              <td>base, shell, python</td>
+              <td>runtime</td>
+              <td>Python 3.12 + mongosh + shell tools</td>
+            </tr>
+            <tr>
+              <td>python-shell-claude</td>
+              <td>base, shell, python, claude</td>
+              <td>ai</td>
+              <td>Python 3.12 + mongosh + Claude Code CLI</td>
+            </tr>
+            <tr>
+              <td>node-shell-grok</td>
+              <td>base, shell, node, grok</td>
+              <td>ai</td>
+              <td>Node.js 22 LTS + mongosh + Grok Build CLI</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Commands -->
+      <section id="commands">
+        <h2>Commands</h2>
+
+        <div class="command-section">
+          <h3><code>mongostage connect [image]</code></h3>
+          <p>Pull and attach to a MongoDB environment. Creates a new container or reattaches to an existing one.</p>
+          <pre><code class="language-bash">mongostage connect                     # pick image interactively
+mongostage connect node-shell-claude   # connect directly
+mongostage connect node-shell --fresh  # remove any existing container first
+mongostage connect node-shell --name my-env  # custom container name</code></pre>
+          <table class="data-table">
+            <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>--image &lt;tag&gt;</td><td>Image slug (alternative to positional arg)</td></tr>
+              <tr><td>--fresh</td><td>Remove existing container before creating a new one</td></tr>
+              <tr><td>--name &lt;name&gt;</td><td>Custom container name</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage list</code></h3>
+          <p>List all available images from the registry.</p>
+          <pre><code class="language-bash">mongostage list                   # all images
+mongostage list --filter ai       # only AI images
+mongostage list --filter runtime  # Node + Python images</code></pre>
+          <p>Categories: <code>base</code>, <code>shell</code>, <code>server</code>, <code>runtime</code>, <code>ai</code></p>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage env</code></h3>
+          <p>Manage credentials injected as environment variables into every container. Stored at <code>~/.mongostage/.env</code>.</p>
+          <pre><code class="language-bash">mongostage env set ANTHROPIC_API_KEY=sk-ant-...   # add or overwrite a key
+mongostage env list                                # list all keys (values masked)
+mongostage env remove ANTHROPIC_API_KEY            # remove one key
+mongostage env clear                               # remove all keys (prompts first)</code></pre>
+          <p><strong>Key format:</strong> must match <code>/^[A-Z_][A-Z0-9_]*$/i</code> &mdash; letters, digits, underscores only.</p>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage setup</code></h3>
+          <p>Install Docker on this machine. Safe to re-run; detects if Docker is already running.</p>
+          <pre><code class="language-bash">mongostage setup</code></pre>
+          <table class="data-table">
+            <thead><tr><th>Platform</th><th>Method</th></tr></thead>
+            <tbody>
+              <tr><td>Linux / WSL2</td><td>Rootless Docker via get.docker.com, falls back to system install</td></tr>
+              <tr><td>macOS</td><td>Installs Colima + Docker via Homebrew</td></tr>
+              <tr><td>Windows (native)</td><td>Installs Docker Desktop via winget</td></tr>
+            </tbody>
+          </table>
+          <div class="callout amber">
+            <p><strong>macOS:</strong> Homebrew must be installed before running <code>mongostage setup</code>. Get it at <a href="https://brew.sh" target="_blank" rel="noopener">brew.sh</a>.</p>
+          </div>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage status</code></h3>
+          <p>Show all MongoStage containers and disk usage.</p>
+          <pre><code class="language-bash">mongostage status</code></pre>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage start [image]</code></h3>
+          <p>Start a stopped container.</p>
+          <pre><code class="language-bash">mongostage start                  # pick from stopped containers
+mongostage start node-shell       # start by slug
+mongostage start node-shell --attach  # start and attach to bash</code></pre>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage stop [image]</code></h3>
+          <p>Stop a running container.</p>
+          <pre><code class="language-bash">mongostage stop                   # pick from running containers
+mongostage stop node-shell        # stop by slug
+mongostage stop --all             # stop all running MongoStage containers</code></pre>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage run [image]</code></h3>
+          <p>Run a container in detached mode. Useful for dev servers and CI.</p>
+          <pre><code class="language-bash">mongostage run node-shell
+mongostage run server-shell --port 27017:27017
+mongostage run node-shell --mount ~/myproject
+mongostage run node-shell --env /path/to/custom.env</code></pre>
+          <table class="data-table">
+            <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>--port &lt;mapping&gt;</td><td>Port mapping, e.g. <code>27017:27017</code></td></tr>
+              <tr><td>--mount &lt;path&gt;</td><td>Mount a host directory at <code>/home/mongo/myproject</code></td></tr>
+              <tr><td>--env &lt;file&gt;</td><td>Load env vars from a specific file instead of <code>~/.mongostage/.env</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage remove [image]</code></h3>
+          <p>Remove a container.</p>
+          <pre><code class="language-bash">mongostage remove                     # pick from stopped containers
+mongostage remove node-shell          # remove by slug
+mongostage remove node-shell --force  # stop and remove even if running
+mongostage remove --all               # remove all stopped containers</code></pre>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage clean</code></h3>
+          <p>Remove all stopped MongoStage containers at once.</p>
+          <pre><code class="language-bash">mongostage clean             # remove stopped containers (prompts first)
+mongostage clean --force     # remove all, running or not
+mongostage clean --images    # also remove pulled Docker images</code></pre>
+        </div>
+
+        <div class="command-section">
+          <h3><code>mongostage timezone [tz]</code></h3>
+          <p>Set the timezone for containers. The default timezone inside containers is UTC.</p>
+          <pre><code class="language-bash">mongostage timezone                  # show current timezone setting
+mongostage timezone America/New_York # set timezone
+mongostage timezone --reset          # reset to UTC</code></pre>
+        </div>
+
+      </section>
+
+      <!-- Global Flags -->
+      <section id="global-flags">
+        <h2>Global Flags</h2>
+        <p>All commands accept:</p>
+        <table class="data-table">
+          <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>--verbose</td><td>Print extra output</td></tr>
+            <tr><td>--silent</td><td>Suppress all non-error output</td></tr>
+            <tr><td>--version</td><td>Print version and exit</td></tr>
+            <tr><td>--help</td><td>Print help for a command</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Configuration -->
+      <section id="configuration">
+        <h2>Configuration</h2>
+
+        <h3><code>~/.mongostage/.env</code> &mdash; credentials</h3>
+        <p>Env vars injected into every container at connect/run time. Managed via <code>mongostage env</code>.</p>
+        <pre><code class="language-bash">ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+MONGO_MOUNT=~/myproject
+MONGO_WORKDIR=/home/mongo/myproject</code></pre>
+        <table class="data-table">
+          <thead><tr><th>Key</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td>MONGO_MOUNT</td><td>Host directory to bind-mount into the container</td></tr>
+            <tr><td>MONGO_WORKDIR</td><td>Working directory inside the container (default <code>/home/mongo/demo</code>)</td></tr>
+          </tbody>
+        </table>
+        <div class="callout amber">
+          <p><strong>WSL2 users:</strong> <code>MONGO_MOUNT</code> must be a WSL2-style path like <code>~/myproject</code> or <code>/home/you/project</code>. Windows paths like <code>C:\Users\...</code> are not supported.</p>
+        </div>
+
+        <h3><code>~/.mongostage/config.json</code> &mdash; CLI state</h3>
+        <p>Auto-created and updated by <code>mongostage setup</code>. You do not normally edit this file by hand.</p>
+        <pre><code class="language-json">{
+  "setupComplete": true,
+  "os": "linux",
+  "dockerMethod": "engine",
+  "defaultOrg": "timatmongodb",
+  "lastUpdated": "2026-06-17T..."
+}</code></pre>
+        <table class="data-table">
+          <thead><tr><th>Field</th><th>Values</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>setupComplete</td><td>true/false</td><td>Whether setup has been run</td></tr>
+            <tr><td>os</td><td>linux, mac, windows</td><td>Detected OS</td></tr>
+            <tr><td>dockerMethod</td><td>engine, colima</td><td>How Docker is installed</td></tr>
+            <tr><td>defaultOrg</td><td>string</td><td>Docker Hub org prefix for images</td></tr>
+          </tbody>
+        </table>
+        <p>The config directory can be overridden with the <code>MONGOSTAGE_CONFIG_DIR</code> environment variable.</p>
+      </section>
+
+      <!-- Platform Notes -->
+      <section id="platform-notes">
+        <h2>Platform Notes</h2>
+
+        <p><strong>macOS</strong> &mdash; Homebrew is required before running <code>mongostage setup</code>. Docker runs via <a href="https://github.com/abiosoft/colima" target="_blank" rel="noopener">Colima</a>, a lightweight VM. The setup command installs both automatically once Homebrew is present.</p>
+
+        <p><strong>WSL2</strong> &mdash; Runs as Linux. <code>MONGO_MOUNT</code> in <code>~/.mongostage/.env</code> must be a WSL2 path (e.g. <code>~/project</code>), not a Windows path (<code>C:\Users\...</code>). MongoStage will reject Windows paths with a clear error.</p>
+
+        <p><strong>Windows native</strong> &mdash; Docker Desktop is installed via winget. A machine restart may be required before Docker is usable.</p>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://github.com/timatmongodb/mongostage" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.npmjs.com/package/mongostage" target="_blank" rel="noopener">npm</a>
+      </div>
+      <p>MongoStage &mdash; Apache 2.0 License</p>
+    </div>
+  </footer>
+
+  <!-- Prism.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <!-- App -->
+  <script src="app.js"></script>
+</body>
+</html>
