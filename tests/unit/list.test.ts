@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const MOCK_IMAGES = [
-  { tag: 'timatmongodb/mongo-docker:base', components: ['base'], description: 'Base image', category: 'base' as const },
-  { tag: 'timatmongodb/mongo-docker:node-shell-claude', components: ['base', 'shell', 'node', 'claude'], description: 'AI dev', category: 'ai' as const },
-  { tag: 'timatmongodb/mongo-docker:server', components: ['base', 'server'], description: 'Server', category: 'server' as const },
+  { tag: 'timatmongodb/mongostage:base', components: ['base'], description: 'Base image', category: 'base' as const },
+  { tag: 'timatmongodb/mongostage:node-shell-claude', components: ['base', 'shell', 'node', 'claude'], description: 'AI dev', category: 'ai' as const },
+  { tag: 'timatmongodb/mongostage:server', components: ['base', 'server'], description: 'Server', category: 'server' as const },
 ];
 
 vi.mock('../../src/lib/config.js', () => ({
@@ -26,9 +26,9 @@ describe('listCommand()', () => {
     await listCommand({});
 
     const output = consoleSpy.mock.calls.map(c => c[0]).join('\n');
-    expect(output).toContain('mongo-docker:base');
-    expect(output).toContain('mongo-docker:node-shell-claude');
-    expect(output).toContain('mongo-docker:server');
+    expect(output).toContain('mongostage:base');
+    expect(output).toContain('mongostage:node-shell-claude');
+    expect(output).toContain('mongostage:server');
   });
 
   it('should strip org prefix from tags in output', async () => {
@@ -38,7 +38,7 @@ describe('listCommand()', () => {
 
     const output = consoleSpy.mock.calls.map(c => c[0]).join('\n');
     expect(output).not.toContain('timatmongodb/');
-    expect(output).toContain('mongo-docker:base');
+    expect(output).toContain('mongostage:base');
   });
 
   it('should filter images by category when --filter is provided', async () => {
@@ -48,8 +48,8 @@ describe('listCommand()', () => {
 
     const output = consoleSpy.mock.calls.map(c => c[0]).join('\n');
     expect(output).toContain('node-shell-claude');
-    expect(output).not.toContain('mongo-docker:base');
-    expect(output).not.toContain('mongo-docker:server');
+    expect(output).not.toContain('mongostage:base');
+    expect(output).not.toContain('mongostage:server');
   });
 
   it('should exit 1 for an invalid category', async () => {

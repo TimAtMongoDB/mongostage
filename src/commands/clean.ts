@@ -11,7 +11,7 @@ export interface CleanOpts {
 export async function cleanCommand(opts: CleanOpts = {}): Promise<void> {
   const state = await detectDockerState();
   if (state !== 'running') {
-    console.error(chalk.red('Docker is not running. Run `mongo-docker setup` to install it.'));
+    console.error(chalk.red('Docker is not running. Run `mongostage setup` to install it.'));
     process.exit(1);
   }
 
@@ -20,8 +20,8 @@ export async function cleanCommand(opts: CleanOpts = {}): Promise<void> {
 
   if (toRemove.length === 0) {
     const msg = opts.force
-      ? 'No mongo-docker containers to remove.'
-      : 'No stopped mongo-docker containers.';
+      ? 'No mongostage containers to remove.'
+      : 'No stopped mongostage containers.';
     console.log(msg);
     return;
   }
@@ -32,7 +32,7 @@ export async function cleanCommand(opts: CleanOpts = {}): Promise<void> {
   if (opts.images) {
     const docker = getDockerClient();
     const images = await docker.listImages({
-      filters: JSON.stringify({ reference: ['timatmongodb/mongo-docker*'] }),
+      filters: JSON.stringify({ reference: ['timatmongodb/mongostage*'] }),
     });
     if (images.length > 0) {
       console.log('\nImages to remove:');
@@ -68,7 +68,7 @@ export async function cleanCommand(opts: CleanOpts = {}): Promise<void> {
   if (opts.images) {
     const docker = getDockerClient();
     const images = await docker.listImages({
-      filters: JSON.stringify({ reference: ['timatmongodb/mongo-docker*'] }),
+      filters: JSON.stringify({ reference: ['timatmongodb/mongostage*'] }),
     });
     for (const img of images) {
       try {

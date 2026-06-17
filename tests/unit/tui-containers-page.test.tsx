@@ -23,8 +23,8 @@ function makeMockStdin() {
 
 const RUNNING_CONTAINER: ContainerState = {
   id: 'abc123',
-  name: 'mongo-docker-node-shell-claude',
-  imageTag: 'timatmongodb/mongo-docker:node-shell-claude',
+  name: 'mongostage-node-shell-claude',
+  imageTag: 'timatmongodb/mongostage:node-shell-claude',
   slug: 'node-shell-claude',
   status: 'running',
   created: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
@@ -32,8 +32,8 @@ const RUNNING_CONTAINER: ContainerState = {
 
 const STOPPED_CONTAINER: ContainerState = {
   id: 'def456',
-  name: 'mongo-docker-node-shell',
-  imageTag: 'timatmongodb/mongo-docker:node-shell',
+  name: 'mongostage-node-shell',
+  imageTag: 'timatmongodb/mongostage:node-shell',
   slug: 'node-shell',
   status: 'stopped',
   created: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
@@ -41,7 +41,7 @@ const STOPPED_CONTAINER: ContainerState = {
 
 const LOCAL_IMAGE: DockerImage = {
   id: 'sha256:abc123',
-  repoTags: ['timatmongodb/mongo-docker:node-shell-claude'],
+  repoTags: ['timatmongodb/mongostage:node-shell-claude'],
   size: 356 * 1024 * 1024, // 356MB
 };
 
@@ -68,7 +68,7 @@ async function renderContainersPage(opts: ContainersMock = {}) {
       return [...running, ...stopped];
     }),
     findContainerBySlug: vi.fn(),
-    getContainerName: vi.fn((slug: string) => `mongo-docker-${slug}`),
+    getContainerName: vi.fn((slug: string) => `mongostage-${slug}`),
     getSlugFromTag: vi.fn((tag: string) => tag.split(':')[1] ?? tag),
   }));
 
@@ -285,7 +285,7 @@ describe('ContainersPage', () => {
         images: [],
       });
       const frame = lastFrame();
-      expect(frame).toContain('No mongo-docker containers');
+      expect(frame).toContain('No mongostage containers');
       instance.unmount();
     });
   });

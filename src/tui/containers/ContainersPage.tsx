@@ -16,7 +16,7 @@ type RowEntry =
 
 const FOOTER = '↑↓ navigate   Enter action   Esc quit';
 const POLL_INTERVAL = 5000;
-const MONGO_DOCKER_FILTER = 'timatmongodb/mongo-docker*';
+const MONGOSTAGE_FILTER = 'timatmongodb/mongostage*';
 
 async function fetchData(): Promise<{
   running: ContainerState[];
@@ -30,7 +30,7 @@ async function fetchData(): Promise<{
 
     const [allContainers, images] = await Promise.all([
       listManagedContainers(),
-      listLocalImages(MONGO_DOCKER_FILTER),
+      listLocalImages(MONGOSTAGE_FILTER),
     ]);
 
     const running = allContainers.filter(c => c.status === 'running');
@@ -134,7 +134,7 @@ export function ContainersPage({ footerHint }: ContainersPageProps): JSX.Element
   if (!dockerRunning) {
     return (
       <Box flexDirection="column" marginLeft={2} marginTop={1}>
-        <Text>Docker is not running. Run <Text color="#00ED64">`mongo-docker setup`</Text> to get started.</Text>
+        <Text>Docker is not running. Run <Text color="#00ED64">`mongostage setup`</Text> to get started.</Text>
       </Box>
     );
   }
@@ -190,7 +190,7 @@ export function ContainersPage({ footerHint }: ContainersPageProps): JSX.Element
       )}
 
       {running.length === 0 && stopped.length === 0 && images.length === 0 && (
-        <Text dimColor>No mongo-docker containers or images found.</Text>
+        <Text dimColor>No mongostage containers or images found.</Text>
       )}
     </Box>
   );

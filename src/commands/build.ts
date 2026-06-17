@@ -144,8 +144,8 @@ export async function buildCommand(
   opts: { push?: boolean; noCache?: boolean; dryRun?: boolean }
 ): Promise<void> {
   if (!imageArg) {
-    console.error('Usage: mongo-docker build <tag> [--push] [--no-cache] [--dry-run]');
-    console.error('Example: mongo-docker build node-shell-claude');
+    console.error('Usage: mongostage build <tag> [--push] [--no-cache] [--dry-run]');
+    console.error('Example: mongostage build node-shell-claude');
     process.exit(1);
   }
 
@@ -178,7 +178,7 @@ export async function buildCommand(
     console.log('Running: docker build ...');
     await buildDockerfileContent(content, fullTag, opts.noCache ?? false);
     console.log(`\n✓ Built ${fullTag}`);
-    console.log(`\nNext: mongo-docker push ${imageArg}`);
+    console.log(`\nNext: mongostage push ${imageArg}`);
     if (opts.push) await _push(fullTag, imageArg);
     return;
   }
@@ -189,7 +189,7 @@ export async function buildCommand(
   if (!best) {
     const shortBase = sorted[0];
     console.error(`No base image found locally for ${fullTag}.`);
-    console.error(`Build the base first: mongo-docker build ${shortBase}`);
+    console.error(`Build the base first: mongostage build ${shortBase}`);
     process.exit(1);
   }
 
@@ -219,7 +219,7 @@ export async function buildCommand(
   if (opts.push) {
     await _push(fullTag, imageArg);
   } else {
-    console.log(`\nNext: mongo-docker push ${imageArg}`);
+    console.log(`\nNext: mongostage push ${imageArg}`);
   }
 }
 
@@ -235,6 +235,6 @@ async function _push(fullTag: string, shortTag: string): Promise<void> {
   console.log('\nDon\'t forget:');
   console.log('  1. Add/update the entry in images.json if new');
   console.log('  2. Run npm publish');
-  console.log(`  Users will see the new image on next: npm update -g mongo-docker`);
+  console.log(`  Users will see the new image on next: npm update -g @timatmongodb/mongostage`);
   void shortTag;
 }

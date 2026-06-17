@@ -36,7 +36,7 @@ export async function removeCommand(
 ): Promise<void> {
   const state = await detectDockerState();
   if (state !== 'running') {
-    console.error(chalk.red('Docker is not running. Run `mongo-docker setup` to install it.'));
+    console.error(chalk.red('Docker is not running. Run `mongostage setup` to install it.'));
     process.exit(1);
   }
 
@@ -45,7 +45,7 @@ export async function removeCommand(
     const removable = opts.force ? containers : containers.filter(c => c.status !== 'running');
 
     if (removable.length === 0) {
-      console.log(opts.force ? 'No mongo-docker containers found.' : 'No stopped mongo-docker containers.');
+      console.log(opts.force ? 'No mongostage containers found.' : 'No stopped mongostage containers.');
       return;
     }
 
@@ -82,7 +82,7 @@ export async function removeCommand(
     const candidates = opts.force ? containers : containers.filter(c => c.status !== 'running');
 
     if (candidates.length === 0) {
-      console.log('No removable mongo-docker containers.');
+      console.log('No removable mongostage containers.');
       return;
     }
 
@@ -119,7 +119,7 @@ export async function removeCommand(
 
   const container = await findContainerBySlug(slug);
   if (!container) {
-    console.error(chalk.red(`No mongo-docker container found for: ${slug}`));
+    console.error(chalk.red(`No mongostage container found for: ${slug}`));
     process.exit(1);
   }
 

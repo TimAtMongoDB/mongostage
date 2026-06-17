@@ -15,7 +15,7 @@ export interface ConnectOpts {
 }
 
 function readMongoEnvFile(): Record<string, string> {
-  const envFile = join(homedir(), '.mongo-docker', '.env');
+  const envFile = join(homedir(), '.mongostage', '.env');
   if (!existsSync(envFile)) return {};
   const result: Record<string, string> = {};
   for (const line of readFileSync(envFile, 'utf8').split('\n')) {
@@ -57,7 +57,7 @@ export async function connectCommand(
 ): Promise<void> {
   const dockerState = await detectDockerState();
   if (dockerState !== 'running') {
-    console.error(chalk.red('Docker is not running. Run `mongo-docker setup` to install it.'));
+    console.error(chalk.red('Docker is not running. Run `mongostage setup` to install it.'));
     process.exit(1);
   }
 
@@ -140,7 +140,7 @@ export async function connectCommand(
     workdir = mongoWorkdir;
   }
 
-  const envFilePath = join(homedir(), '.mongo-docker', '.env');
+  const envFilePath = join(homedir(), '.mongostage', '.env');
 
   await runContainer({
     tag: fullTag,

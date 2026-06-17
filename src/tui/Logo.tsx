@@ -4,7 +4,7 @@ import { Box, Text } from 'ink';
 export function Logo(): JSX.Element {
   return (
     <Box marginLeft={2}>
-      <Text>🍃  mongo-docker</Text>
+      <Text>🍃  MongoStage</Text>
     </Box>
   );
 }

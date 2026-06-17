@@ -47,7 +47,7 @@ function patchBashrcPath(pathEntry: string): void {
   }
   const exportLine = `export PATH="$PATH:${pathEntry}"`;
   if (!content.includes(pathEntry)) {
-    appendFileSync(bashrc, `\n# Added by mongo-docker setup\n${exportLine}\n`);
+    appendFileSync(bashrc, `\n# Added by mongostage setup\n${exportLine}\n`);
   }
 }
 
@@ -165,7 +165,7 @@ async function handleMac(state: 'not-running' | 'not-installed'): Promise<'colim
       console.error(
         chalk.red('✗') +
           '  Homebrew is required but not installed.\n' +
-          '   Visit https://brew.sh to install it, then run mongo-docker setup again.'
+          '   Visit https://brew.sh to install it, then run mongostage setup again.'
       );
       process.exit(1);
     }
@@ -218,7 +218,7 @@ async function handleWindows(): Promise<never> {
     '\n' +
       chalk.green('✓') +
       '  Please reboot your machine to complete the Docker Desktop setup,\n' +
-      '   then run mongo-docker setup again to verify.'
+      '   then run mongostage setup again to verify.'
   );
   process.exit(0);
 }

@@ -1,10 +1,10 @@
 {
-  "name": "@timatmongodb/mongo-docker",
+  "name": "@timatmongodb/mongostage",
   "version": "0.1.0",
-  "description": "MongoDB-branded Docker environments for demos and content creation",
+  "description": "MongoDB-branded Docker environments — spawn a stage for demos, workshops, and content creation",
   "type": "module",
   "bin": {
-    "mongo-docker": "./dist/index.js"
+    "mongostage": "./dist/index.js"
   },
   "engines": {
     "node": ">=22.0.0"

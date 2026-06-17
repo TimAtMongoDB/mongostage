@@ -28,15 +28,15 @@ export async function statusCommand(): Promise<void> {
   console.log(`Docker          ${daemonLabel}\n`);
 
   if (dockerState !== 'running') {
-    console.log('Run `mongo-docker setup` to install Docker.');
+    console.log('Run `mongostage setup` to install Docker.');
     return;
   }
 
   const containers = await listManagedContainers();
 
   if (containers.length === 0) {
-    console.log(chalk.dim('No mongo-docker containers.'));
-    console.log(chalk.dim('Run `mongo-docker connect <image>` to create one.'));
+    console.log(chalk.dim('No mongostage containers.'));
+    console.log(chalk.dim('Run `mongostage connect <image>` to create one.'));
   } else {
     const COL = { container: 28, image: 22, status: 10 };
     const header =
@@ -60,11 +60,11 @@ export async function statusCommand(): Promise<void> {
   try {
     const docker = getDockerClient();
     const images = await docker.listImages({
-      filters: JSON.stringify({ reference: ['timatmongodb/mongo-docker*'] }),
+      filters: JSON.stringify({ reference: ['timatmongodb/mongostage*'] }),
     });
     if (images.length > 0) {
       const total = images.reduce((sum, img) => sum + (img.Size ?? 0), 0);
-      console.log(`\nDisk used by mongo-docker images: ${formatBytes(total)}`);
+      console.log(`\nDisk used by mongostage images: ${formatBytes(total)}`);
     }
   } catch {
     console.log(chalk.dim('\n(disk usage unavailable)'));

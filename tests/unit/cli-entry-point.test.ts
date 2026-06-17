@@ -47,10 +47,10 @@ describe('createProgram()', () => {
     expect(names).toContain('build');
   });
 
-  it('should set the program name to mongo-docker', async () => {
+  it('should set the program name to mongostage', async () => {
     const { createProgram } = await import('../../src/index.js');
     const program = createProgram();
-    expect(program.name()).toBe('mongo-docker');
+    expect(program.name()).toBe('mongostage');
   });
 
   it('should exit with non-zero code for an unknown subcommand', () => {

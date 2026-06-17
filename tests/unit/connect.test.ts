@@ -11,18 +11,18 @@ vi.mock('../../src/lib/docker.js', () => ({
 }));
 
 vi.mock('../../src/lib/containers.js', () => ({
-  getContainerName: (slug: string) => `mongo-docker-${slug}`,
+  getContainerName: (slug: string) => `mongostage-${slug}`,
   getSlugFromTag: (tag: string) => tag.split(':')[1] ?? tag,
   findContainerBySlug: vi.fn(() => undefined),
 }));
 
 vi.mock('../../src/lib/config.js', () => ({
   getImages: vi.fn(() => [
-    { tag: 'timatmongodb/mongo-docker:node-shell-claude', components: ['base', 'claude'], description: 'AI shell', category: 'ai' },
+    { tag: 'timatmongodb/mongostage:node-shell-claude', components: ['base', 'claude'], description: 'AI shell', category: 'ai' },
   ]),
   getImageBySlug: vi.fn((slug: string) =>
-    slug === 'node-shell-claude' || slug === 'timatmongodb/mongo-docker:node-shell-claude'
-      ? { tag: 'timatmongodb/mongo-docker:node-shell-claude', components: ['base', 'claude'], description: 'AI shell', category: 'ai' }
+    slug === 'node-shell-claude' || slug === 'timatmongodb/mongostage:node-shell-claude'
+      ? { tag: 'timatmongodb/mongostage:node-shell-claude', components: ['base', 'claude'], description: 'AI shell', category: 'ai' }
       : undefined
   ),
 }));
@@ -98,6 +98,6 @@ describe('connectCommand() — error paths', () => {
     // Mock to return a valid image for node-shell-claude
     const img = vi.mocked(getImageBySlug)('node-shell-claude');
     expect(img).toBeDefined();
-    expect(img?.tag).toBe('timatmongodb/mongo-docker:node-shell-claude');
+    expect(img?.tag).toBe('timatmongodb/mongostage:node-shell-claude');
   });
 });

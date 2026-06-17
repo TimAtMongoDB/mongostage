@@ -16,8 +16,8 @@ export function createProgram(): Command {
   const program = new Command();
 
   program
-    .name('mongo-docker')
-    .description('MongoDB Docker environments for demos, workshops, and content creation')
+    .name('mongostage')
+    .description('Spawn a MongoDB stage for demos, workshops, and content creation')
     .version('1.0.0')
     .allowUnknownOption(false)
     .option('--verbose', 'enable verbose output')
@@ -92,7 +92,7 @@ export function createProgram(): Command {
     .command('stop [image]')
     .description('Stop a running container')
     .option('--image <slug>', 'container slug to stop (alternative to positional arg)')
-    .option('--all', 'stop all running mongo-docker containers')
+    .option('--all', 'stop all running mongostage containers')
     .action(async (image: string | undefined, opts: { image?: string; all?: boolean }) => {
       const { stopCommand } = await import('./commands/stop.js');
       await stopCommand(image, opts);
@@ -133,7 +133,7 @@ export function createProgram(): Command {
 
   program
     .command('clean')
-    .description('Remove all stopped mongo-docker containers')
+    .description('Remove all stopped mongostage containers')
     .option('--images', 'also remove locally pulled Docker images')
     .option('--force', 'stop and remove all containers, running or not')
     .action(async (opts: { images?: boolean; force?: boolean }) => {
@@ -143,7 +143,7 @@ export function createProgram(): Command {
 
   program
     .command('status')
-    .description('Show status of all mongo-docker containers')
+    .description('Show status of all mongostage containers')
     .action(async () => {
       const { statusCommand } = await import('./commands/status.js');
       await statusCommand();

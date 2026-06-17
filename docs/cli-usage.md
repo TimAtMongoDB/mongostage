@@ -4,13 +4,13 @@
 
 ## Commands
 
-- `mongo-docker` — open the TUI
-- `mongo-docker list` — list available images
-- `mongo-docker connect <image>` — start and attach to a container
-- `mongo-docker env` — show current environment
-- `mongo-docker setup` — install Docker (first-time setup)
-- `mongo-docker stop <image>` — stop a running container
-- `mongo-docker start <image>` — restart a stopped container
-- `mongo-docker remove <image>` — remove a container
-- `mongo-docker clean` — remove all mongo-docker containers
-- `mongo-docker status` — show all managed containers
+- `mongostage` — open the TUI
+- `mongostage list` — list available images
+- `mongostage connect <image>` — start and attach to a container
+- `mongostage env` — show current environment
+- `mongostage setup` — install Docker (first-time setup)
+- `mongostage stop <image>` — stop a running container
+- `mongostage start <image>` — restart a stopped container
+- `mongostage remove <image>` — remove a container
+- `mongostage clean` — remove all mongostage containers
+- `mongostage status` — show all managed containers

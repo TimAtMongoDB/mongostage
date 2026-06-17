@@ -23,7 +23,7 @@ afterEach(async () => {
 
 describe('connect command integration', () => {
   it.skip('should pull and attach to a running container — requires Docker', async () => {
-    expect.fail('Not implemented — MDD skeleton. Run manually: mongo-docker connect node-shell-claude');
+    expect.fail('Not implemented — MDD skeleton. Run manually: mongostage connect node-shell-claude');
   });
 
   it.skip('should attach to existing running container without pulling again — requires Docker', async () => {

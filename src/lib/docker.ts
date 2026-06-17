@@ -122,8 +122,8 @@ export async function runContainer(opts: RunContainerOpts): Promise<Dockerode.Co
     WorkingDir: opts.workdir ?? '/home/mongo/demo',
     Env: envVars,
     Labels: {
-      'mongo-docker': 'true',
-      'mongo-docker-slug': opts.slug,
+      'mongostage': 'true',
+      'mongostage-slug': opts.slug,
     },
     HostConfig: {
       Binds: binds,

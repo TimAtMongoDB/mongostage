@@ -19,7 +19,7 @@ export async function runCommand(
 ): Promise<void> {
   const state = await detectDockerState();
   if (state !== 'running') {
-    console.error(chalk.red('Docker is not running. Run `mongo-docker setup` to install it.'));
+    console.error(chalk.red('Docker is not running. Run `mongostage setup` to install it.'));
     process.exit(1);
   }
 
@@ -72,7 +72,7 @@ export async function runCommand(
 
   const envFilePath = opts.env
     ? resolve(opts.env)
-    : join(homedir(), '.mongo-docker', '.env');
+    : join(homedir(), '.mongostage', '.env');
   const envFile = existsSync(envFilePath) ? envFilePath : undefined;
 
   await runContainer({

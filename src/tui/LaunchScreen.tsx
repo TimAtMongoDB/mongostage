@@ -109,7 +109,7 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         updateStep(1, 'skipped');
       } else {
         updateStep(1, 'active');
-        updateStep(1, 'error', 'Docker is not running. Run `mongo-docker setup` to install it.');
+        updateStep(1, 'error', 'Docker is not running. Run `mongostage setup` to install it.');
         onError(new Error('Docker is not running'));
         return;
       }

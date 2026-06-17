@@ -1,9 +1,9 @@
 import type Dockerode from 'dockerode';
 import type { ContainerState } from '../types/container.js';
 
-const LABEL_KEY = 'mongo-docker';
-const LABEL_SLUG = 'mongo-docker-slug';
-const NAME_PREFIX = 'mongo-docker-';
+const LABEL_KEY = 'mongostage';
+const LABEL_SLUG = 'mongostage-slug';
+const NAME_PREFIX = 'mongostage-';
 
 export function getContainerName(slug: string): string {
   return `${NAME_PREFIX}${slug}`;

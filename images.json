@@ -10,49 +10,49 @@
   },
   "images": [
     {
-      "tag": "timatmongodb/mongo-docker:base",
+      "tag": "timatmongodb/mongostage:base",
       "components": ["base"],
       "description": "Ubuntu 24.04 LTS with MongoDB-branded terminal environment",
       "category": "base"
     },
     {
-      "tag": "timatmongodb/mongo-docker:shell",
+      "tag": "timatmongodb/mongostage:shell",
       "components": ["base", "shell"],
       "description": "Ubuntu 24.04 with mongosh, mongoimport, mongoexport, and mongodump",
       "category": "shell"
     },
     {
-      "tag": "timatmongodb/mongo-docker:server-shell",
+      "tag": "timatmongodb/mongostage:server-shell",
       "components": ["base", "server", "shell"],
       "description": "MongoDB Community Server 8.0 with full shell tooling",
       "category": "server"
     },
     {
-      "tag": "timatmongodb/mongo-docker:node-shell",
+      "tag": "timatmongodb/mongostage:node-shell",
       "components": ["base", "shell", "node"],
       "description": "Node.js 22 LTS with mongosh and shell tools",
       "category": "runtime"
     },
     {
-      "tag": "timatmongodb/mongo-docker:node-shell-claude",
+      "tag": "timatmongodb/mongostage:node-shell-claude",
       "components": ["base", "shell", "node", "claude"],
       "description": "Node.js 22 LTS with mongosh and Claude Code CLI",
       "category": "ai"
     },
     {
-      "tag": "timatmongodb/mongo-docker:python-shell",
+      "tag": "timatmongodb/mongostage:python-shell",
       "components": ["base", "shell", "python"],
       "description": "Python 3.12 with mongosh and shell tools",
       "category": "runtime"
     },
     {
-      "tag": "timatmongodb/mongo-docker:python-shell-claude",
+      "tag": "timatmongodb/mongostage:python-shell-claude",
       "components": ["base", "shell", "python", "claude"],
       "description": "Python 3.12 with mongosh and Claude Code CLI",
       "category": "ai"
     },
     {
-      "tag": "timatmongodb/mongo-docker:node-shell-grok",
+      "tag": "timatmongodb/mongostage:node-shell-grok",
       "components": ["base", "shell", "node", "grok"],
       "description": "Node.js 22 LTS with mongosh and Grok Build CLI",
       "category": "ai"

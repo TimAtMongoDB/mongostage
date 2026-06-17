@@ -22,9 +22,9 @@ describe('getImageBySlug()', () => {
 
   it('should return the correct image for a full tag', async () => {
     const { getImageBySlug } = await import('../../src/lib/config.js');
-    const image = getImageBySlug('timatmongodb/mongo-docker:node-shell-claude');
+    const image = getImageBySlug('timatmongodb/mongostage:node-shell-claude');
     expect(image).toBeDefined();
-    expect(image?.tag).toBe('timatmongodb/mongo-docker:node-shell-claude');
+    expect(image?.tag).toBe('timatmongodb/mongostage:node-shell-claude');
   });
 
   it('should return undefined for an unknown slug', async () => {
@@ -38,13 +38,13 @@ describe('resolveFullTag()', () => {
   it('should prepend org prefix to a short slug', async () => {
     const { resolveFullTag } = await import('../../src/lib/config.js');
     const tag = resolveFullTag('node-shell-claude');
-    expect(tag).toBe('timatmongodb/mongo-docker:node-shell-claude');
+    expect(tag).toBe('timatmongodb/mongostage:node-shell-claude');
   });
 
   it('should return full tags unchanged', async () => {
     const { resolveFullTag } = await import('../../src/lib/config.js');
-    const tag = resolveFullTag('timatmongodb/mongo-docker:node-shell-claude');
-    expect(tag).toBe('timatmongodb/mongo-docker:node-shell-claude');
+    const tag = resolveFullTag('timatmongodb/mongostage:node-shell-claude');
+    expect(tag).toBe('timatmongodb/mongostage:node-shell-claude');
   });
 });
 
@@ -71,11 +71,11 @@ describe('getCliConfig()', () => {
   });
 
   afterEach(() => {
-    delete process.env.MONGO_DOCKER_CONFIG_DIR;
+    delete process.env.MONGOSTAGE_CONFIG_DIR;
   });
 
   it('should return defaults when config directory does not exist', async () => {
-    process.env.MONGO_DOCKER_CONFIG_DIR = '/nonexistent-mongo-docker-test-dir-xyz';
+    process.env.MONGOSTAGE_CONFIG_DIR = '/nonexistent-mongo-docker-test-dir-xyz';
     const { getCliConfig } = await import('../../src/lib/config.js');
     const config = getCliConfig();
     expect(config).toBeDefined();
