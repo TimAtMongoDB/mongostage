@@ -1,5 +1,9 @@
 # MongoStage
 
+[![MongoStage](docs/mongostage_hero.webp)](https://timatmongodb.github.io/mongostage/)
+
+**[timatmongodb.github.io/mongostage](https://timatmongodb.github.io/mongostage/)**
+
 MongoDB-branded Docker environments for demos, workshops, and content creation. Comes with a full terminal UI and CLI for managing containers across Linux, macOS, and Windows (WSL2).
 
 ## Requirements
