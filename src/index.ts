@@ -190,6 +190,7 @@ if (isMain) {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
+    process.stdout.write('\x1Bc');
     const { default: App } = await import('./tui/App.js');
     const { default: React } = await import('react');
     const { render } = await import('ink');
