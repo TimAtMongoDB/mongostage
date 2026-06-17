@@ -1,6 +1,6 @@
 # MongoStage
 
-[![MongoStage](docs/mongostage_hero.webp)](https://timatmongodb.github.io/mongostage/)
+[![MongoStage](https://raw.githubusercontent.com/TimAtMongoDB/mongostage/main/docs/mongostage_hero.webp)](https://timatmongodb.github.io/mongostage/)
 
 **[View the web version here](https://timatmongodb.github.io/mongostage/)**
 
