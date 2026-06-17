@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
 import type { ImageConfig } from '../types/image.js';
-import { detectDockerState, pullImage, runContainer, startContainer, getDockerClient } from '../lib/docker.js';
+import { detectDockerState, pullImage, runContainer, startContainer, getDockerClient, getContainerLogs } from '../lib/docker.js';
 import { findContainerBySlug, getContainerName, getSlugFromTag } from '../lib/containers.js';
 import { attachToContainer } from '../commands/connect.js';
 import type { RunContainerOpts } from '../types/container.js';
@@ -82,6 +82,7 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
   const [steps, setSteps] = useState<Step[]>(initialSteps);
   const [errored, setErrored] = useState(false);
   const [capturedError, setCapturedError] = useState<Error | null>(null);
+  const [containerLogs, setContainerLogs] = useState<string | null>(null);
 
   useInput((_input, _key) => {
     if (capturedError) onError(capturedError);
@@ -163,7 +164,9 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
           const docker = getDockerClient();
           const info = await docker.getContainer(containerName).inspect();
           if (!info.State.Running) {
-            updateStep(3, 'error', `Container exited immediately. Run \`docker logs ${containerName}\` to see what happened.`);
+            const logs = await getContainerLogs(containerName);
+            setContainerLogs(logs || '(no output)');
+            updateStep(3, 'error', 'Container exited immediately.');
             triggerError(3, new Error('Container exited immediately after start'));
             return;
           }
@@ -185,7 +188,9 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
           await exec.start({});
           updateStep(4, 'complete');
         } catch (err) {
-          updateStep(4, 'error', `Container stopped unexpectedly. Run \`docker logs ${containerName}\` for details.`);
+          const logs = await getContainerLogs(containerName);
+          setContainerLogs(logs || '(no output)');
+          updateStep(4, 'error', 'Container stopped unexpectedly.');
           triggerError(4, toError(err));
           return;
         }
@@ -221,6 +226,12 @@ export function LaunchScreen({ image, onComplete, onError }: LaunchScreenProps):
         {steps.map((step, i) => (
           <StepRow key={i} step={step} />
         ))}
+        {containerLogs && (
+          <Box marginTop={1} flexDirection="column">
+            <Text dimColor>Container output:</Text>
+            <Text dimColor>{containerLogs}</Text>
+          </Box>
+        )}
         {errored && (
           <Box marginTop={1}>
             <Text dimColor>Press any key to go back</Text>

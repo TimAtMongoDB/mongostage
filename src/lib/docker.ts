@@ -191,3 +191,14 @@ export async function inspectContainer(nameOrId: string): Promise<Dockerode.Cont
   const container = docker.getContainer(nameOrId);
   return container.inspect();
 }
+
+export async function getContainerLogs(nameOrId: string, tail = 20): Promise<string> {
+  return new Promise(resolve => {
+    const chunks: string[] = [];
+    const proc = spawn('docker', ['logs', '--tail', String(tail), nameOrId], { stdio: ['ignore', 'pipe', 'pipe'] });
+    proc.stdout?.on('data', (chunk: Buffer) => chunks.push(chunk.toString()));
+    proc.stderr?.on('data', (chunk: Buffer) => chunks.push(chunk.toString()));
+    proc.on('close', () => resolve(chunks.join('').trim()));
+    proc.on('error', () => resolve(''));
+  });
+}
