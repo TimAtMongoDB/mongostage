@@ -1,8 +1,8 @@
 {
   "components": {
     "base": { "label": "base", "description": "Ubuntu 24.04 LTS", "order": 0 },
-    "server": { "label": "server", "description": "MongoDB Community Server 8.0", "order": 1 },
-    "shell": { "label": "shell", "description": "mongosh + import/export/dump", "order": 2 },
+    "shell": { "label": "shell", "description": "mongosh + import/export/dump", "order": 1 },
+    "server": { "label": "server", "description": "MongoDB Community Server 8.0", "order": 2 },
     "node": { "label": "node", "description": "Node.js 22 LTS + Git", "order": 3 },
     "python": { "label": "python", "description": "Python 3.12 + pip + Git", "order": 4 },
     "claude": { "label": "claude", "description": "Claude Code CLI", "order": 5 },
