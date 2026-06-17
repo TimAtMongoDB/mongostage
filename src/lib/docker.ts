@@ -117,8 +117,8 @@ export async function runContainer(opts: RunContainerOpts): Promise<Dockerode.Co
     AttachStdin: !opts.detach,
     AttachStdout: !opts.detach,
     AttachStderr: !opts.detach,
-    OpenStdin: !opts.detach,
-    Tty: !opts.detach,
+    OpenStdin: true,
+    Tty: true,
     WorkingDir: opts.workdir ?? '/home/mongo/demo',
     Env: envVars,
     Labels: {
