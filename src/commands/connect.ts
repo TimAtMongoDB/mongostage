@@ -43,6 +43,9 @@ export function attachToContainer(nameOrId: string): void {
   process.stdout.write('\x1B[?25h'); // ensure cursor is visible
   const result = spawnSync('docker', ['exec', '-it', nameOrId, 'bash'], { stdio: 'inherit' });
   if (result.error) throw result.error;
+  // Exit immediately — stdin.resume() (added for Ink cleanup) keeps the event
+  // loop alive after spawnSync returns, causing an apparent hang on "exit".
+  process.exit(result.status ?? 0);
 }
 
 export async function connectCommand(
