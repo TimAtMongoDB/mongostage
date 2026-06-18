@@ -8,6 +8,12 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       mongodb-org=8.0.* \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-# mongod is started via exec in an entrypoint or user script, not via service
+    && rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /home/mongo/data && \
+    chown mongo:mongo /home/mongo/data
+
+COPY assets/server-start.sh /usr/local/bin/server-start.sh
+RUN chmod +x /usr/local/bin/server-start.sh
+
 USER mongo
+CMD ["/usr/local/bin/server-start.sh"]
