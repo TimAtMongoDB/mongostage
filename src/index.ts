@@ -232,7 +232,7 @@ if (isMain) {
       // Let the event loop flush Ink's cleanup callbacks before spawning.
       await new Promise(r => setImmediate(r));
       const { attachToContainer } = await import('./commands/connect.js');
-      await attachToContainer(containerToAttach);
+      attachToContainer(containerToAttach);
     }
   } else {
     const program = createProgram();

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import ora from 'ora';
 import chalk from 'chalk';
 import { detectDockerState, pullImage, runContainer, stopContainer, startContainer, removeContainer } from '../lib/docker.js';
@@ -35,16 +35,14 @@ function expandTilde(p: string): string {
   return p.startsWith('~') ? p.replace(/^~/, homedir()) : p;
 }
 
-export async function attachToContainer(nameOrId: string): Promise<void> {
-  // Ensure the terminal is in a clean cooked state before docker exec takes over.
-  // Docker's -t flag re-applies raw mode; we need to start from a known baseline.
+export function attachToContainer(nameOrId: string): void {
+  // spawnSync blocks the Node.js thread entirely while docker exec runs.
+  // Async spawn keeps the event loop alive in the background, which interferes
+  // with fast typing by competing for stdin under high keystroke rates.
   if (process.stdin.isTTY) process.stdin.setRawMode(false);
   process.stdout.write('\x1B[?25h'); // ensure cursor is visible
-  return new Promise((resolve, reject) => {
-    const proc = spawn('docker', ['exec', '-it', nameOrId, 'bash'], { stdio: 'inherit' });
-    proc.on('exit', () => resolve());
-    proc.on('error', reject);
-  });
+  const result = spawnSync('docker', ['exec', '-it', nameOrId, 'bash'], { stdio: 'inherit' });
+  if (result.error) throw result.error;
 }
 
 export async function connectCommand(
@@ -110,12 +108,12 @@ export async function connectCommand(
   if (existing && !opts.fresh) {
     if (existing.status === 'running') {
       console.log(chalk.green(`Attaching to running container: ${containerName}`));
-      await attachToContainer(existing.name);
+      attachToContainer(existing.name);
       return;
     }
     console.log(chalk.green(`Starting stopped container: ${containerName}`));
     await startContainer(existing.id);
-    await attachToContainer(existing.name);
+    attachToContainer(existing.name);
     return;
   }
 
@@ -152,5 +150,5 @@ export async function connectCommand(
     workdir,
     detach: true,
   });
-  await attachToContainer(containerName);
+  attachToContainer(containerName);
 }
