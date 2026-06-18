@@ -225,6 +225,12 @@ if (isMain) {
     await waitUntilExit();
 
     if (containerToAttach) {
+      // Remove all stdin listeners Ink may have left behind so they don't
+      // intercept keystrokes intended for the docker exec session.
+      process.stdin.removeAllListeners();
+      process.stdin.resume();
+      // Let the event loop flush Ink's cleanup callbacks before spawning.
+      await new Promise(r => setImmediate(r));
       const { attachToContainer } = await import('./commands/connect.js');
       await attachToContainer(containerToAttach);
     }

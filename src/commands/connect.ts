@@ -36,6 +36,10 @@ function expandTilde(p: string): string {
 }
 
 export async function attachToContainer(nameOrId: string): Promise<void> {
+  // Ensure the terminal is in a clean cooked state before docker exec takes over.
+  // Docker's -t flag re-applies raw mode; we need to start from a known baseline.
+  if (process.stdin.isTTY) process.stdin.setRawMode(false);
+  process.stdout.write('\x1B[?25h'); // ensure cursor is visible
   return new Promise((resolve, reject) => {
     const proc = spawn('docker', ['exec', '-it', nameOrId, 'bash'], { stdio: 'inherit' });
     proc.on('exit', () => resolve());
