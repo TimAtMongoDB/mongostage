@@ -1,9 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { spawn } from 'node:child_process';
 import ora from 'ora';
 import chalk from 'chalk';
-import { detectDockerState, pullImage, runContainer, stopContainer, startContainer, removeContainer, getDockerClient } from '../lib/docker.js';
+import { detectDockerState, pullImage, runContainer, stopContainer, startContainer, removeContainer } from '../lib/docker.js';
 import { getImages, getImageBySlug } from '../lib/config.js';
 import { getContainerName, getSlugFromTag, findContainerBySlug } from '../lib/containers.js';
 import { detectPlatform } from '../lib/os.js';
@@ -34,21 +35,12 @@ function expandTilde(p: string): string {
   return p.startsWith('~') ? p.replace(/^~/, homedir()) : p;
 }
 
-async function attachExisting(containerId: string): Promise<void> {
-  const docker = getDockerClient();
-  const container = docker.getContainer(containerId);
-  const stream = await container.attach({ stream: true, stdin: true, stdout: true, stderr: true }) as NodeJS.ReadWriteStream;
-  process.stdin.setRawMode?.(true);
-  process.stdin.resume();
-  process.stdin.pipe(stream);
-  stream.pipe(process.stdout);
-  await container.wait();
-  process.stdin.unpipe(stream);
-  process.stdin.setRawMode?.(false);
-}
-
 export async function attachToContainer(nameOrId: string): Promise<void> {
-  await attachExisting(nameOrId);
+  return new Promise((resolve, reject) => {
+    const proc = spawn('docker', ['exec', '-it', nameOrId, 'bash'], { stdio: 'inherit' });
+    proc.on('exit', () => resolve());
+    proc.on('error', reject);
+  });
 }
 
 export async function connectCommand(
@@ -114,12 +106,12 @@ export async function connectCommand(
   if (existing && !opts.fresh) {
     if (existing.status === 'running') {
       console.log(chalk.green(`Attaching to running container: ${containerName}`));
-      await attachExisting(existing.id);
+      await attachToContainer(existing.name);
       return;
     }
     console.log(chalk.green(`Starting stopped container: ${containerName}`));
     await startContainer(existing.id);
-    await attachExisting(existing.id);
+    await attachToContainer(existing.name);
     return;
   }
 
@@ -154,6 +146,7 @@ export async function connectCommand(
     mountHost,
     mountTarget,
     workdir,
-    detach: false,
+    detach: true,
   });
+  await attachToContainer(containerName);
 }
