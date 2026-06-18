@@ -210,26 +210,31 @@ if (isMain) {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    process.stdout.write('\x1Bc');
     const { default: App } = await import('./tui/App.js');
     const { default: React } = await import('react');
     const { render } = await import('ink');
     const { getImages } = await import('./lib/config.js');
+    const { attachToContainer } = await import('./commands/connect.js');
 
-    let containerToAttach: string | null = null;
-    const { waitUntilExit } = render(React.createElement(App, {
-      images: getImages(),
-      onContainerReady: (name: string) => { containerToAttach = name; },
-    }));
+    // Loop: after exiting a container session, return to the TUI.
+    // The loop breaks when the user quits the TUI without launching a container.
+    while (true) {
+      process.stdout.write('\x1Bc');
 
-    await waitUntilExit();
+      let containerToAttach: string | null = null;
+      const { waitUntilExit } = render(React.createElement(App, {
+        images: getImages(),
+        onContainerReady: (name: string) => { containerToAttach = name; },
+      }));
 
-    if (containerToAttach) {
-      // Remove all stdin listeners Ink may have left behind, then let the
-      // event loop flush Ink's cleanup callbacks before spawning.
+      await waitUntilExit();
+
+      if (!containerToAttach) break;
+
+      // Remove Ink's stdin listeners and let cleanup settle before handing
+      // off the terminal to docker exec.
       process.stdin.removeAllListeners();
       await new Promise(r => setImmediate(r));
-      const { attachToContainer } = await import('./commands/connect.js');
       attachToContainer(containerToAttach);
     }
   } else {

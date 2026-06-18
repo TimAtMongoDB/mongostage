@@ -35,7 +35,7 @@ function expandTilde(p: string): string {
   return p.startsWith('~') ? p.replace(/^~/, homedir()) : p;
 }
 
-export function attachToContainer(nameOrId: string): void {
+export function attachToContainer(nameOrId: string): number {
   // spawnSync blocks the Node.js thread entirely while docker exec runs.
   // Async spawn keeps the event loop alive in the background, which interferes
   // with fast typing by competing for stdin under high keystroke rates.
@@ -43,9 +43,7 @@ export function attachToContainer(nameOrId: string): void {
   process.stdout.write('\x1B[?25h'); // ensure cursor is visible
   const result = spawnSync('docker', ['exec', '-it', nameOrId, 'bash'], { stdio: 'inherit' });
   if (result.error) throw result.error;
-  // Exit immediately — stdin.resume() (added for Ink cleanup) keeps the event
-  // loop alive after spawnSync returns, causing an apparent hang on "exit".
-  process.exit(result.status ?? 0);
+  return result.status ?? 0;
 }
 
 export async function connectCommand(
