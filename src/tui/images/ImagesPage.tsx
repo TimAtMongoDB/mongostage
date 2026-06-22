@@ -12,6 +12,17 @@ interface ImagesPageProps {
 }
 
 const FOOTER = '↑↓ navigate   ←→ filter   Enter launch   Esc quit';
+const POLL_INTERVAL = 5000;
+
+async function fetchRunningSet(): Promise<Set<string>> {
+  try {
+    const { listManagedContainers } = await import('../../lib/containers.js');
+    const containers = await listManagedContainers();
+    return new Set(containers.filter(c => c.status === 'running').map(c => c.slug));
+  } catch {
+    return new Set();
+  }
+}
 
 function filterImages(images: ImageConfig[], filter: ImageFilter, search: string): ImageConfig[] {
   let result = filter === 'all' ? images : images.filter(img => img.category === filter);
@@ -26,12 +37,19 @@ export function ImagesPage({ images, onLaunch, footerHint }: ImagesPageProps): J
   const [activeFilter, setActiveFilter] = useState<ImageFilter>('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [search, setSearch] = useState('');
+  const [runningSet, setRunningSet] = useState<Set<string>>(new Set());
 
   const filteredImages = filterImages(images, activeFilter, search);
 
   useEffect(() => {
     footerHint(FOOTER);
   }, [footerHint]);
+
+  useEffect(() => {
+    void fetchRunningSet().then(setRunningSet);
+    const interval = setInterval(() => { void fetchRunningSet().then(setRunningSet); }, POLL_INTERVAL);
+    return () => clearInterval(interval);
+  }, []);
 
   // Reset selection when filter/search changes
   useEffect(() => {
@@ -93,6 +111,7 @@ export function ImagesPage({ images, onLaunch, footerHint }: ImagesPageProps): J
           <ImageList
             images={filteredImages}
             selectedIndex={selectedIndex}
+            runningSet={runningSet}
           />
         </Box>
         <Box flexDirection="column" width="50%">

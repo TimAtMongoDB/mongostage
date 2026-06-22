@@ -5,6 +5,7 @@ import type { ImageConfig } from '../../types/image.js';
 interface ImageListProps {
   images: ImageConfig[];
   selectedIndex: number;
+  runningSet: Set<string>;
 }
 
 function slugFromTag(tag: string): string {
@@ -12,7 +13,7 @@ function slugFromTag(tag: string): string {
   return colon >= 0 ? tag.slice(colon + 1) : tag;
 }
 
-export function ImageList({ images, selectedIndex }: ImageListProps): JSX.Element {
+export function ImageList({ images, selectedIndex, runningSet }: ImageListProps): JSX.Element {
   if (images.length === 0) {
     return (
       <Box marginLeft={2}>
@@ -25,13 +26,16 @@ export function ImageList({ images, selectedIndex }: ImageListProps): JSX.Elemen
     <Box flexDirection="column" flexGrow={1}>
       {images.map((img, i) => {
         const slug = slugFromTag(img.tag);
+        const isRunning = runningSet.has(slug);
         return i === selectedIndex ? (
           <Box key={img.tag}>
             <Text color="#00ED64">▶ {slug}</Text>
+            {isRunning && <Text color="#00ED64"> (Running)</Text>}
           </Box>
         ) : (
           <Box key={img.tag} marginLeft={2}>
             <Text>{slug}</Text>
+            {isRunning && <Text color="#00ED64"> (Running)</Text>}
           </Box>
         );
       })}
