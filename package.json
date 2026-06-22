@@ -1,6 +1,6 @@
 {
   "name": "mongostage",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "MongoDB-branded Docker environments — spawn a stage for demos, workshops, and content creation",
   "type": "module",
   "bin": {
