@@ -2,6 +2,8 @@
 import { fileURLToPath } from 'node:url';
 import { realpathSync } from 'node:fs';
 import { Command } from 'commander';
+import pkg from '../package.json' with { type: 'json' };
+const { version } = pkg;
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
@@ -19,7 +21,7 @@ export function createProgram(): Command {
   program
     .name('mongostage')
     .description('Spawn a MongoDB stage for demos, workshops, and content creation')
-    .version('1.0.0')
+    .version(version)
     .allowUnknownOption(false)
     .option('--verbose', 'enable verbose output')
     .option('--silent', 'suppress all non-error output');
