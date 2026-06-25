@@ -1,4 +1,4 @@
-# Clear screen — no OS info, no last login, no motd
+# Clear screen - no OS info, no last login, no motd
 clear
 
 # Render MongoDB leaf centred in MongoDB green (#00ED64 = RGB 0,237,100)

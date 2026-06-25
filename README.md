@@ -19,7 +19,7 @@ This is an independent project and is **not an official MongoDB product**. It is
 ## Requirements
 
 - **Node.js** >= 22
-- **Docker** — not required upfront; `mongostage setup` installs it
+- **Docker** - not required upfront; `mongostage setup` installs it
 
 ## Install
 
@@ -39,12 +39,35 @@ mongostage connect   # connect to a container from the CLI
 
 ## Interactive TUI
 
-Running `mongostage` with no arguments opens an interactive terminal UI. Two pages, navigated with `Tab`:
+Running `mongostage` with no arguments opens an interactive terminal UI. Three pages, navigated with `Tab`:
 
-- **Images** — Browse available images, filter by category (`← →`), search by typing, launch with `Enter`
-- **Containers** — View running and stopped containers, stop/start/remove/shell in from a menu
+- **Images** - Browse available images, filter by category (`← →`), search by typing, launch with `Enter`
+- **Containers** - View running and stopped containers, stop/start/remove/shell in from a menu
+- **Topology** - Spawn pre-configured multi-container MongoDB setups (standalone, replica set, sharded cluster, with or without Atlas Search)
 
 ![MongoStage TUI](https://raw.githubusercontent.com/TimAtMongoDB/mongostage/main/docs/screenshots/mongostage_tui.webp)
+
+### Containers page
+
+The Containers page is where you manage everything that's running - start, stop, remove containers, and pull or delete images.
+
+Pick a container and press `Enter` - a menu will show where you can choose to (start/stop/remove) the container
+
+![MongoStage Containers page](https://raw.githubusercontent.com/TimAtMongoDB/mongostage/main/docs/screenshots/mongostage_containers.webp)
+
+### Topology page
+
+Pick a preset and press `Enter` - mongostage runs `docker compose` in the background, auto-assigns available ports (starting from 27017), and shows the connection string when it's ready. Press `c` to copy it to clipboard, `d` to tear the topology down.
+
+| Preset | Description |
+|--------|-------------|
+| Standalone | Single mongod node |
+| Replica Set (3 nodes) | 3-member replica set |
+| Sharded Cluster | 2 shards x 3 nodes + config servers + mongos |
+| Standalone + Atlas Search | Standalone mongod with mongot sidecar |
+| Replica Set + Atlas Search | 3-node replica set with mongot sidecar |
+
+![MongoStage Topology page](https://raw.githubusercontent.com/TimAtMongoDB/mongostage/main/docs/screenshots/mongostage_topology.webp)
 
 ---
 
@@ -71,7 +94,7 @@ Every container drops you into a branded MongoDB terminal with mongosh, the full
 
 All images run as a non-root `mongo` user and include a Starship prompt.
 
-Use the short tag with any command — `node-shell-claude` not the full `timatmongodb/mongostage:node-shell-claude`.
+Use the short tag with any command - `node-shell-claude` not the full `timatmongodb/mongostage:node-shell-claude`.
 
 ---
 
@@ -123,7 +146,7 @@ mongostage env remove ANTHROPIC_API_KEY            # remove one key
 mongostage env clear                               # remove all keys (prompts first)
 ```
 
-**Key format:** must match `/^[A-Z_][A-Z0-9_]*$/i` — letters, digits, underscores only. Values cannot contain newlines.
+**Key format:** must match `/^[A-Z_][A-Z0-9_]*$/i` - letters, digits, underscores only. Values cannot contain newlines.
 
 ---
 
@@ -256,7 +279,7 @@ All commands accept:
 
 ## Configuration files
 
-### `~/.mongostage/.env` — credentials
+### `~/.mongostage/.env` - credentials
 
 Env vars injected into every container at connect/run time. Managed via `mongostage env`.
 
@@ -278,7 +301,7 @@ MONGO_WORKDIR=/home/mongo/myproject
 
 File permissions are set to `0600` (owner read/write only).
 
-### `~/.mongostage/config.json` — CLI state
+### `~/.mongostage/config.json` - CLI state
 
 Auto-created and updated by `mongostage setup`. You do not normally edit this file by hand.
 
@@ -305,11 +328,11 @@ The config directory can be overridden with the `MONGOSTAGE_CONFIG_DIR` environm
 
 ## Platform notes
 
-**macOS** — Homebrew is required before running `mongostage setup`. Docker runs via [Colima](https://github.com/abiosoft/colima), a lightweight VM. The setup command installs both automatically once Homebrew is present.
+**macOS** - Homebrew is required before running `mongostage setup`. Docker runs via [Colima](https://github.com/abiosoft/colima), a lightweight VM. The setup command installs both automatically once Homebrew is present.
 
-**WSL2** — Runs as Linux. `MONGO_MOUNT` in `~/.mongostage/.env` must be a WSL2 path (e.g. `~/project`), not a Windows path (`C:\Users\...`). MongoStage will reject Windows paths with a clear error.
+**WSL2** - Runs as Linux. `MONGO_MOUNT` in `~/.mongostage/.env` must be a WSL2 path (e.g. `~/project`), not a Windows path (`C:\Users\...`). MongoStage will reject Windows paths with a clear error.
 
-**Windows native** — Docker Desktop is installed via winget. A machine restart may be required before Docker is usable.
+**Windows native** - Docker Desktop is installed via winget. A machine restart may be required before Docker is usable.
 
 ---
 

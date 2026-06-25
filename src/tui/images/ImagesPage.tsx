@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, useInput } from 'ink';
+import { Box, useInput, useApp } from 'ink';
 import type { ImageConfig } from '../../types/image.js';
 import { FilterBar, FILTER_TABS, type ImageFilter } from './FilterBar.js';
 import { ImageList } from './ImageList.js';
@@ -34,6 +34,7 @@ function filterImages(images: ImageConfig[], filter: ImageFilter, search: string
 }
 
 export function ImagesPage({ images, onLaunch, footerHint }: ImagesPageProps): JSX.Element {
+  const { exit } = useApp();
   const [activeFilter, setActiveFilter] = useState<ImageFilter>('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [search, setSearch] = useState('');
@@ -88,6 +89,10 @@ export function ImagesPage({ images, onLaunch, footerHint }: ImagesPageProps): J
     }
     if (key.backspace || key.delete) {
       setSearch(s => s.slice(0, -1));
+      return;
+    }
+    if (key.escape) {
+      exit();
       return;
     }
     // Any printable character appends to search (not Tab, Escape, Enter, arrows)

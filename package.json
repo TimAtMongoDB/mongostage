@@ -1,7 +1,7 @@
 {
   "name": "mongostage",
-  "version": "1.0.5",
-  "description": "MongoDB-branded Docker environments — spawn a stage for demos, workshops, and content creation",
+  "version": "1.1.0",
+  "description": "MongoDB-branded Docker environments - spawn a stage for demos, workshops, and content creation",
   "type": "module",
   "bin": {
     "mongostage": "./dist/index.js"
@@ -12,7 +12,8 @@
   "files": [
     "dist/",
     "assets/",
-    "images.json"
+    "images.json",
+    "docker-compose/"
   ],
   "scripts": {
     "build": "tsc && chmod +x dist/index.js",

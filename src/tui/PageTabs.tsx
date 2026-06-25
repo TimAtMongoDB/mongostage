@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 
-export type ActivePage = 'images' | 'containers';
+export type ActivePage = 'images' | 'containers' | 'topology';
 
 interface PageTabsProps {
   activePage: ActivePage;
@@ -19,6 +19,11 @@ export function PageTabs({ activePage }: PageTabsProps): JSX.Element {
         <Text backgroundColor="#00ED64" color="black">▶ Containers</Text>
       ) : (
         <Text dimColor>  Containers</Text>
+      )}
+      {activePage === 'topology' ? (
+        <Text backgroundColor="#00ED64" color="black">▶ Topology</Text>
+      ) : (
+        <Text dimColor>  Topology</Text>
       )}
     </Box>
   );

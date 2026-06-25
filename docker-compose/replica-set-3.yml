@@ -1,0 +1,112 @@
+# Replica Set (3 nodes)
+# Members advertise via *.localhost hostnames which resolve to 127.0.0.1 on Linux/macOS/WSL2.
+# Host ports are auto-assigned at spawn time via MONGO_HOST_PORT_1/2/3 (defaults: 27017/27018/27019).
+services:
+  rs0-1:
+    image: mongo:8.0
+    container_name: topology-rs3-rs0-1
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "${MONGO_HOST_PORT_1:-27017}:27017"
+    extra_hosts:
+      - "rs0-1.localhost:host-gateway"
+      - "rs0-2.localhost:host-gateway"
+      - "rs0-3.localhost:host-gateway"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-rs3-rs0-1"
+    volumes:
+      - rs3-data-1:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  rs0-2:
+    image: mongo:8.0
+    container_name: topology-rs3-rs0-2
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "${MONGO_HOST_PORT_2:-27018}:27017"
+    extra_hosts:
+      - "rs0-1.localhost:host-gateway"
+      - "rs0-2.localhost:host-gateway"
+      - "rs0-3.localhost:host-gateway"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-rs3-rs0-2"
+    volumes:
+      - rs3-data-2:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  rs0-3:
+    image: mongo:8.0
+    container_name: topology-rs3-rs0-3
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "${MONGO_HOST_PORT_3:-27019}:27017"
+    extra_hosts:
+      - "rs0-1.localhost:host-gateway"
+      - "rs0-2.localhost:host-gateway"
+      - "rs0-3.localhost:host-gateway"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-rs3-rs0-3"
+    volumes:
+      - rs3-data-3:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  rs-init:
+    image: mongo:8.0
+    container_name: topology-rs3-init
+    depends_on:
+      rs0-1:
+        condition: service_healthy
+      rs0-2:
+        condition: service_healthy
+      rs0-3:
+        condition: service_healthy
+    command:
+      - mongosh
+      - --host
+      - rs0-1
+      - --port
+      - "27017"
+      - --quiet
+      - --eval
+      - |
+        try {
+          rs.status();
+          print("Replica set already initialized");
+        } catch(e) {
+          rs.initiate({
+            _id: "rs0",
+            members: [
+              { _id: 0, host: "rs0-1.localhost:${MONGO_HOST_PORT_1:-27017}" },
+              { _id: 1, host: "rs0-2.localhost:${MONGO_HOST_PORT_2:-27018}" },
+              { _id: 2, host: "rs0-3.localhost:${MONGO_HOST_PORT_3:-27019}" }
+            ]
+          });
+          print("Replica set initialized");
+        }
+    restart: "no"
+
+volumes:
+  rs3-data-1:
+  rs3-data-2:
+  rs3-data-3:

@@ -106,10 +106,11 @@ describe('TUI App Shell', () => {
       instance.unmount();
     });
 
-    it('should switch back to Images page on second Tab key', async () => {
+    it('should switch back to Images page after full 3-page cycle', async () => {
       const { lastFrame, pressKey, instance } = await renderApp();
-      await pressKey('\t');
-      await pressKey('\t');
+      await pressKey('\t'); // images -> containers
+      await pressKey('\t'); // containers -> topology
+      await pressKey('\t'); // topology -> images
       const frame = lastFrame();
       expect(frame).toContain('▶ Images');
       instance.unmount();

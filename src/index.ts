@@ -218,10 +218,21 @@ if (isMain) {
     const { getImages } = await import('./lib/config.js');
     const { attachToContainer } = await import('./commands/connect.js');
 
+    // Enter alternate screen buffer: no scrollback, so resize never shows ghost content.
+    // Hide cursor for a cleaner TUI look.
+    process.stdout.write('\x1B[?1049h\x1B[?25l');
+    const restoreTerminal = () => process.stdout.write('\x1B[?25h\x1B[?1049l');
+    process.once('exit', restoreTerminal);
+
+    // Register clear-on-resize BEFORE render() so this listener fires before
+    // Ink's internal resize handler. Ink then redraws onto a clean screen.
+    const clearOnResize = () => process.stdout.write('\x1B[2J\x1B[H');
+    process.stdout.on('resize', clearOnResize);
+
     // Loop: after exiting a container session, return to the TUI.
     // The loop breaks when the user quits the TUI without launching a container.
     while (true) {
-      process.stdout.write('\x1Bc');
+      process.stdout.write('\x1B[2J\x1B[H'); // clear within alt screen
 
       let containerToAttach: string | null = null;
       const { waitUntilExit } = render(React.createElement(App, {
@@ -239,6 +250,9 @@ if (isMain) {
       await new Promise(r => setImmediate(r));
       attachToContainer(containerToAttach);
     }
+
+    process.stdout.off('resize', clearOnResize);
+    restoreTerminal();
   } else {
     const program = createProgram();
     try {

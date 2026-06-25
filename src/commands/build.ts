@@ -63,7 +63,7 @@ function parseFragment(content: string): { builderStages: string; layerBody: str
     return { builderStages, layerBody: afterMarker };
   }
 
-  // No explicit marker — split on FROM ... AS (builder) vs body
+  // No explicit marker - split on FROM ... AS (builder) vs body
   const lines = content.split('\n');
   const builderLines: string[] = [];
   const bodyLines: string[] = [];
