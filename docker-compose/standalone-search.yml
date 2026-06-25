@@ -1,0 +1,125 @@
+# Standalone + Atlas Search
+# mongot requires the mongod to be in a replica set, so mongo-1 runs with --replSet rs0.
+# Connection string: mongodb://localhost:27017/?directConnection=true
+# Note: first run pulls mongodb/mongodb-community-search which may take a few minutes.
+services:
+  mongo-1:
+    image: mongo:8.0
+    container_name: topology-standalone-search-mongo
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --port
+      - "27017"
+      - --setParameter
+      - searchIndexManagementHostAndPort=search-mongot:27028
+      - --setParameter
+      - mongotHost=search-mongot:27028
+      - --setParameter
+      - skipAuthenticationToSearchIndexManagementServer=false
+    ports:
+      - "${MONGO_HOST_PORT_1:-27017}:27017"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-standalone-search-mongo"
+    volumes:
+      - standalone-search-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  rs-init:
+    image: mongo:8.0
+    container_name: topology-standalone-search-rs-init
+    depends_on:
+      mongo-1:
+        condition: service_healthy
+    command:
+      - mongosh
+      - --host
+      - mongo-1
+      - --port
+      - "27017"
+      - --quiet
+      - --eval
+      - |
+        try {
+          rs.status();
+          print("RS already initialized");
+        } catch(e) {
+          rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "mongo-1:27017" }] });
+          print("RS initialized");
+        }
+    restart: "no"
+
+  search-user-init:
+    image: mongo:8.0
+    container_name: topology-standalone-search-user-init
+    depends_on:
+      rs-init:
+        condition: service_completed_successfully
+    command:
+      - mongosh
+      - --host
+      - mongo-1
+      - --port
+      - "27017"
+      - --quiet
+      - --eval
+      - |
+        for (let i = 0; i < 30; i++) {
+          try {
+            const admin = db.getSiblingDB("admin");
+            const existing = admin.getUser("mongotUser");
+            if (!existing) {
+              admin.createUser({
+                user: "mongotUser",
+                pwd: "mongotPassword",
+                roles: [{ role: "searchCoordinator", db: "admin" }]
+              });
+              print("mongotUser created");
+            } else {
+              print("mongotUser already exists");
+            }
+            break;
+          } catch(e) {
+            print("Waiting for primary... " + e.message);
+            sleep(1000);
+          }
+        }
+    restart: "no"
+
+  search-mongot:
+    image: mongodb/mongodb-community-search:latest
+    container_name: topology-standalone-search-mongot
+    depends_on:
+      search-user-init:
+        condition: service_completed_successfully
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >
+        cp /mongot-community/pwfile /tmp/pwfile &&
+        chmod 600 /tmp/pwfile &&
+        sed 's|/mongot-community/pwfile|/tmp/pwfile|g' /mongot-community/config.default.yml > /tmp/mongot-config.yml &&
+        exec /mongot-community/mongot --config /tmp/mongot-config.yml
+    ports:
+      - "${MONGOT_HOST_PORT_1:-27028}:27028"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-standalone-search-mongot"
+    volumes:
+      - standalone-search-mongot-data:/data/mongot
+      - ./search-config/mongot-standalone.conf:/mongot-community/config.default.yml:ro
+      - ./search-config/pwfile:/mongot-community/pwfile:ro
+    restart: "no"
+
+volumes:
+  standalone-search-data:
+  standalone-search-mongot-data:

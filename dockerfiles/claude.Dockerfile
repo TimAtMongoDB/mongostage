@@ -1,5 +1,5 @@
 # Component fragment: Claude Code CLI
-# Works on any base layer — installs Node.js if npm is not already present
+# Works on any base layer - installs Node.js if npm is not already present
 
 USER root
 RUN if ! command -v npm > /dev/null 2>&1; then \

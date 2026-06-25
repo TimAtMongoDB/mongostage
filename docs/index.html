@@ -49,7 +49,7 @@
           <div class="brand">
             <span class="brand-text">
               <span class="brand-title">MongoStage</span>
-              <span class="brand-author">by <a href="https://github.com/timatmongodb" target="_blank" rel="noopener">timatmongodb</a></span>
+              <span class="brand-author">by <a href="https://github.com/timatmongodb" target="_blank" rel="noopener">TimAtMongoDB</a></span>
             </span>
           </div>
         </li>
@@ -75,6 +75,7 @@
       <a href="#install">Install</a>
       <a href="#quick-start">Quick Start</a>
       <a href="#tui">Interactive TUI</a>
+      <a href="#topology">Topology</a>
       <a href="#images">Available Images</a>
       <a href="#commands">Commands</a>
       <a href="#global-flags">Global Flags</a>
@@ -118,6 +119,7 @@
         <a href="#install">Install</a>
         <a href="#quick-start">Quick Start</a>
         <a href="#tui">Interactive TUI</a>
+        <a href="#topology">Topology</a>
         <a href="#images">Available Images</a>
         <a href="#commands">Commands</a>
         <a href="#global-flags">Global Flags</a>
@@ -128,6 +130,15 @@
 
     <!-- Main Content -->
     <main id="content">
+
+      <!-- Disclaimer -->
+      <section id="disclaimer">
+        <div class="callout amber">
+          <p><strong>Disclaimer</strong></p>
+          <p>This is an independent project and is <strong>not an official MongoDB product</strong>. It is intended for local development, demos, testing, and learning purposes only.</p>
+          <p><strong>&#9888;&#65039; Do not use this tool in production environments.</strong></p>
+        </div>
+      </section>
 
       <!-- Install -->
       <section id="install">
@@ -153,19 +164,65 @@ mongostage connect   # connect to a container from the CLI</code></pre>
 
         <p>
           Running <code>mongostage</code> with no arguments opens an interactive terminal UI.
-          Two pages, navigated with <code>Tab</code>:
+          Three pages, navigated with <code>Tab</code>:
         </p>
 
         <ul>
-          <li><strong>Images</strong> &mdash; Browse available images, filter by category (<code>&larr; &rarr;</code>), search by typing, launch with <code>Enter</code></li>
-          <li><strong>Containers</strong> &mdash; View running and stopped containers, stop/start/remove/shell in from a menu</li>
+          <li><strong>Images</strong> - Browse available images, filter by category (<code>&larr; &rarr;</code>), search by typing, launch with <code>Enter</code></li>
+          <li><strong>Containers</strong> - View running and stopped containers, stop/start/remove/shell in from a menu</li>
+          <li><strong>Topology</strong> - Spawn pre-configured multi-container MongoDB setups</li>
         </ul>
 
         <div class="screenshot">
           <img
             src="screenshots/mongostage_tui.webp"
             alt="MongoStage TUI showing the images page with category filters and container list"
-            width="1593"
+            width="1345"
+            loading="lazy"
+          />
+        </div>
+
+        <p>The Containers page is where you manage everything that's running - start, stop, remove containers, and pull or delete images.</p>
+
+        <div class="screenshot">
+          <img
+            src="screenshots/mongostage_containers.webp"
+            alt="MongoStage TUI showing the containers page with running and stopped containers"
+            width="1335"
+            loading="lazy"
+          />
+        </div>
+      </section>
+
+      <!-- Topology -->
+      <section id="topology">
+        <h2>Topology</h2>
+
+        <p>
+          The Topology page lets you spin up pre-configured multi-container MongoDB setups without leaving the TUI.
+          Select a preset and press <code>Enter</code> - mongostage runs <code>docker compose</code> in the background,
+          finds available ports starting from 27017, and displays the connection string when the topology is ready.
+          Press <code>c</code> to copy it to clipboard, <code>d</code> to tear it down.
+        </p>
+
+        <table class="data-table">
+          <thead>
+            <tr><th>Preset</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Standalone</td><td>Single mongod node</td></tr>
+            <tr><td>Replica Set (3 nodes)</td><td>3-member replica set</td></tr>
+            <tr><td>Sharded Cluster</td><td>2 shards x 3 nodes + config servers + mongos</td></tr>
+            <tr><td>Standalone + Atlas Search</td><td>Standalone mongod with mongot sidecar</td></tr>
+            <tr><td>Replica Set + Atlas Search</td><td>3-node replica set with mongot sidecar</td></tr>
+          </tbody>
+        </table>
+
+        <div class="screenshot">
+          <img
+            src="screenshots/mongostage_topology.webp"
+            alt="MongoStage Topology page showing preset list with a running replica set and its connection string"
+            width="1335"
             loading="lazy"
           />
         </div>

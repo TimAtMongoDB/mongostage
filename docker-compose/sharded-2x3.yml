@@ -1,0 +1,325 @@
+# Sharded Cluster — 2 shards x 3 members + 3 config servers + mongos
+# Connection string: mongodb://localhost:27017
+services:
+  # Config server replica set
+  cfg1:
+    image: mongo:8.0
+    container_name: topology-sharded-cfg1
+    command: ["mongod", "--configsvr", "--replSet", "cfg", "--bind_ip_all", "--port", "27017", "--dbpath", "/data/db"]
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-cfg1"
+    volumes:
+      - sharded-cfg1-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  cfg2:
+    image: mongo:8.0
+    container_name: topology-sharded-cfg2
+    command: ["mongod", "--configsvr", "--replSet", "cfg", "--bind_ip_all", "--port", "27017", "--dbpath", "/data/db"]
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-cfg2"
+    volumes:
+      - sharded-cfg2-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  cfg3:
+    image: mongo:8.0
+    container_name: topology-sharded-cfg3
+    command: ["mongod", "--configsvr", "--replSet", "cfg", "--bind_ip_all", "--port", "27017", "--dbpath", "/data/db"]
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-cfg3"
+    volumes:
+      - sharded-cfg3-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  cfg-init:
+    image: mongo:8.0
+    container_name: topology-sharded-cfg-init
+    depends_on:
+      cfg1:
+        condition: service_healthy
+      cfg2:
+        condition: service_healthy
+      cfg3:
+        condition: service_healthy
+    command:
+      - mongosh
+      - --host
+      - cfg1
+      - --port
+      - "27017"
+      - --quiet
+      - --eval
+      - |
+        try {
+          rs.status();
+          print("Config RS already initialized");
+        } catch(e) {
+          rs.initiate({
+            _id: "cfg",
+            configsvr: true,
+            members: [
+              { _id: 0, host: "cfg1:27017" },
+              { _id: 1, host: "cfg2:27017" },
+              { _id: 2, host: "cfg3:27017" }
+            ]
+          });
+          print("Config RS initialized");
+        }
+    restart: "no"
+
+  # Shard 1 replica set
+  shard1-1:
+    image: mongo:8.0
+    container_name: topology-sharded-shard1-1
+    command: ["mongod", "--shardsvr", "--replSet", "shardRS1", "--bind_ip_all", "--port", "27017", "--dbpath", "/data/db"]
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-shard1-1"
+    volumes:
+      - sharded-shard1-1-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  shard1-2:
+    image: mongo:8.0
+    container_name: topology-sharded-shard1-2
+    command: ["mongod", "--shardsvr", "--replSet", "shardRS1", "--bind_ip_all", "--port", "27017", "--dbpath", "/data/db"]
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-shard1-2"
+    volumes:
+      - sharded-shard1-2-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  shard1-3:
+    image: mongo:8.0
+    container_name: topology-sharded-shard1-3
+    command: ["mongod", "--shardsvr", "--replSet", "shardRS1", "--bind_ip_all", "--port", "27017", "--dbpath", "/data/db"]
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-shard1-3"
+    volumes:
+      - sharded-shard1-3-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  shard1-init:
+    image: mongo:8.0
+    container_name: topology-sharded-shard1-init
+    depends_on:
+      shard1-1:
+        condition: service_healthy
+      shard1-2:
+        condition: service_healthy
+      shard1-3:
+        condition: service_healthy
+    command:
+      - mongosh
+      - --host
+      - shard1-1
+      - --port
+      - "27017"
+      - --quiet
+      - --eval
+      - |
+        try {
+          rs.status();
+          print("shardRS1 already initialized");
+        } catch(e) {
+          rs.initiate({
+            _id: "shardRS1",
+            members: [
+              { _id: 0, host: "shard1-1:27017" },
+              { _id: 1, host: "shard1-2:27017" },
+              { _id: 2, host: "shard1-3:27017" }
+            ]
+          });
+          print("shardRS1 initialized");
+        }
+    restart: "no"
+
+  # Shard 2 replica set
+  shard2-1:
+    image: mongo:8.0
+    container_name: topology-sharded-shard2-1
+    command: ["mongod", "--shardsvr", "--replSet", "shardRS2", "--bind_ip_all", "--port", "27017", "--dbpath", "/data/db"]
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-shard2-1"
+    volumes:
+      - sharded-shard2-1-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  shard2-2:
+    image: mongo:8.0
+    container_name: topology-sharded-shard2-2
+    command: ["mongod", "--shardsvr", "--replSet", "shardRS2", "--bind_ip_all", "--port", "27017", "--dbpath", "/data/db"]
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-shard2-2"
+    volumes:
+      - sharded-shard2-2-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  shard2-3:
+    image: mongo:8.0
+    container_name: topology-sharded-shard2-3
+    command: ["mongod", "--shardsvr", "--replSet", "shardRS2", "--bind_ip_all", "--port", "27017", "--dbpath", "/data/db"]
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-shard2-3"
+    volumes:
+      - sharded-shard2-3-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  shard2-init:
+    image: mongo:8.0
+    container_name: topology-sharded-shard2-init
+    depends_on:
+      shard2-1:
+        condition: service_healthy
+      shard2-2:
+        condition: service_healthy
+      shard2-3:
+        condition: service_healthy
+    command:
+      - mongosh
+      - --host
+      - shard2-1
+      - --port
+      - "27017"
+      - --quiet
+      - --eval
+      - |
+        try {
+          rs.status();
+          print("shardRS2 already initialized");
+        } catch(e) {
+          rs.initiate({
+            _id: "shardRS2",
+            members: [
+              { _id: 0, host: "shard2-1:27017" },
+              { _id: 1, host: "shard2-2:27017" },
+              { _id: 2, host: "shard2-3:27017" }
+            ]
+          });
+          print("shardRS2 initialized");
+        }
+    restart: "no"
+
+  # Query router
+  mongos:
+    image: mongo:8.0
+    container_name: topology-sharded-mongos
+    command:
+      - mongos
+      - --configdb
+      - cfg/cfg1:27017,cfg2:27017,cfg3:27017
+      - --bind_ip_all
+      - --port
+      - "27017"
+    ports:
+      - "${MONGO_HOST_PORT_1:-27017}:27017"
+    depends_on:
+      cfg-init:
+        condition: service_completed_successfully
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-sharded-mongos"
+    restart: "no"
+
+  mongos-init:
+    image: mongo:8.0
+    container_name: topology-sharded-mongos-init
+    depends_on:
+      - mongos
+      - shard1-init
+      - shard2-init
+    command:
+      - mongosh
+      - --host
+      - mongos
+      - --port
+      - "27017"
+      - --quiet
+      - --eval
+      - |
+        for (let i = 0; i < 30; i++) {
+          try {
+            sh.addShard("shardRS1/shard1-1:27017,shard1-2:27017,shard1-3:27017");
+            sh.addShard("shardRS2/shard2-1:27017,shard2-2:27017,shard2-3:27017");
+            print("Shards added");
+            break;
+          } catch(e) {
+            print("Waiting for mongos... " + e.message);
+            sleep(2000);
+          }
+        }
+    restart: "no"
+
+volumes:
+  sharded-cfg1-data:
+  sharded-cfg2-data:
+  sharded-cfg3-data:
+  sharded-shard1-1-data:
+  sharded-shard1-2-data:
+  sharded-shard1-3-data:
+  sharded-shard2-1-data:
+  sharded-shard2-2-data:
+  sharded-shard2-3-data:

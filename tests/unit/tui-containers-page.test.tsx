@@ -161,7 +161,7 @@ describe('ContainersPage', () => {
 
     it('should call footerHint with the correct hint string', async () => {
       const { footerHint, instance } = await renderContainersPage();
-      expect(footerHint).toHaveBeenCalledWith('↑↓ navigate   Enter action   Esc quit');
+      expect(footerHint).toHaveBeenCalledWith('↑↓ navigate   Enter action   ← back   Esc quit');
       instance.unmount();
     });
 

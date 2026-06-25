@@ -1,0 +1,16 @@
+services:
+  mongo-1:
+    image: mongo:8.0
+    container_name: topology-standalone-mongo
+    command: ["mongod", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "${MONGO_HOST_PORT_1:-27017}:27017"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-standalone-mongo"
+    volumes:
+      - standalone-data:/data/db
+    restart: "no"
+
+volumes:
+  standalone-data:

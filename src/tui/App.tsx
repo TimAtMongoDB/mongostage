@@ -4,6 +4,7 @@ import { type ImageConfig } from '../types/image.js';
 import { PageTabs, type ActivePage } from './PageTabs.js';
 import { ImagesPage } from './images/ImagesPage.js';
 import { ContainersPage } from './containers/ContainersPage.js';
+import { TopologyPage } from './topology/TopologyPage.js';
 import { LaunchScreen } from './LaunchScreen.js';
 import { Logo } from './Logo.js';
 
@@ -23,22 +24,36 @@ export default function App({ images, onContainerReady }: AppProps): JSX.Element
     if (launchImage) process.stdout.write('\x1B[2J\x1B[H');
   }, [launchImage]);
 
+  // Track terminal width so the divider recomputes after resize.
+  // The actual screen clear fires from index.ts (registered before render() so
+  // it runs before Ink's handler). Here we only update state so Ink re-renders
+  // the divider at the new width.
+  const [termWidth, setTermWidth] = useState(process.stdout.columns ?? 80);
+  useEffect(() => {
+    const onResize = () => setTermWidth(process.stdout.columns ?? 80);
+    process.stdout.on('resize', onResize);
+    return () => { process.stdout.off('resize', onResize); };
+  }, []);
+
   useInput((_input, key) => {
     if (launchImage) return;
     if (key.tab) {
-      setActivePage(p => (p === 'images' ? 'containers' : 'images'));
+      setActivePage(p => {
+        if (p === 'images') return 'containers';
+        if (p === 'containers') return 'topology';
+        return 'images';
+      });
     }
-    if (key.escape) {
-      exit();
-    }
+    // Escape is handled by each page so submenus can intercept it before exit fires
   });
 
   const tabArrow =
     activePage === 'images'
-      ? 'Tab ──────────────────────────────────► Containers'
-      : 'Tab ◄──────────────────────────────────── Images';
+      ? 'Tab  Images ──► Containers ──► Topology'
+      : activePage === 'containers'
+      ? 'Tab  Images ◄── Containers ──► Topology'
+      : 'Tab  Images ◄── Containers ◄── Topology';
 
-  const termWidth = process.stdout.columns ?? 80;
   const divider = '─'.repeat(termWidth);
 
   if (launchImage) {
@@ -66,8 +81,10 @@ export default function App({ images, onContainerReady }: AppProps): JSX.Element
             onLaunch={(img) => { setLaunchImage(img); }}
             footerHint={setFooterLine1}
           />
-        ) : (
+        ) : activePage === 'containers' ? (
           <ContainersPage footerHint={setFooterLine1} />
+        ) : (
+          <TopologyPage footerHint={setFooterLine1} />
         )}
       </Box>
       <Box flexDirection="column">

@@ -14,7 +14,7 @@ type RowEntry =
   | { kind: 'container'; container: ContainerState }
   | { kind: 'image'; image: DockerImage };
 
-const FOOTER = '↑↓ navigate   Enter action   Esc quit';
+const FOOTER = '↑↓ navigate   Enter action   ← back   Esc quit';
 const POLL_INTERVAL = 5000;
 const MONGOSTAGE_FILTER = 'timatmongodb/mongostage*';
 

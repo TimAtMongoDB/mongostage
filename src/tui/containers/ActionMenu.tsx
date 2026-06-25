@@ -69,7 +69,7 @@ export function ActionMenu({ rowType, targetName, onAction, onClose }: ActionMen
       }
       return;
     }
-    if (key.escape) {
+    if (key.escape || key.leftArrow) {
       onClose();
     }
   });

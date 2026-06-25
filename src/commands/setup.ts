@@ -62,7 +62,7 @@ async function startRootlessDaemon(): Promise<void> {
     await execFileAsync('systemctl', ['--user', 'start', 'docker']);
     return;
   } catch {
-    // systemctl unavailable (WSL2 without systemd) — spawn dockerd directly
+    // systemctl unavailable (WSL2 without systemd) - spawn dockerd directly
   }
   const dockerdPath = join(homedir(), '.local', 'share', 'docker', 'bin', 'dockerd');
   await spawnBackground(dockerdPath, []);
@@ -98,7 +98,7 @@ async function handleLinux(state: 'not-running' | 'not-installed'): Promise<'eng
     daemonSpinner.succeed('Docker daemon started');
   } catch (rootlessErr) {
     const rootlessMsg = rootlessErr instanceof Error ? rootlessErr.message : String(rootlessErr);
-    rootlessSpinner.fail(`Rootless install failed (${rootlessMsg}) — trying system-level install...`);
+    rootlessSpinner.fail(`Rootless install failed (${rootlessMsg}) - trying system-level install...`);
 
     const sudoSpinner = ora('Installing Docker Engine (system)...').start();
     try {
@@ -125,10 +125,10 @@ async function handleLinux(state: 'not-running' | 'not-installed'): Promise<'eng
         await execFileAsync('sudo', ['usermod', '-aG', 'docker', username]);
         groupSpinner.succeed('User added to docker group');
       } catch {
-        groupSpinner.warn('Could not add user to docker group — you may need sudo for docker commands');
+        groupSpinner.warn('Could not add user to docker group - you may need sudo for docker commands');
       }
     } else {
-      groupSpinner.warn('Could not determine username — add yourself to the docker group manually');
+      groupSpinner.warn('Could not determine username - add yourself to the docker group manually');
     }
 
     console.log(chalk.yellow('\n⚠  You need to log out and back in for group changes to take effect.'));
@@ -268,7 +268,7 @@ export async function setupCommand(): Promise<void> {
     platform !== 'windows-native' &&
     existsSync(join(homedir(), '.local', 'share', 'docker'))
   ) {
-    // rootless install — remind about PATH
+    // rootless install - remind about PATH
     console.log(chalk.dim('   Note: ~/.local/bin was added to PATH in ~/.bashrc. Restart your shell to apply.'));
   }
 }

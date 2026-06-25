@@ -1,0 +1,211 @@
+# Replica Set (3 nodes) + Atlas Search
+# Connection string: mongodb://rs0-1.localhost:27017,rs0-2.localhost:27018,rs0-3.localhost:27019/?replicaSet=rs0
+# Note: first run pulls mongodb/mongodb-community-search which may take a few minutes.
+services:
+  rs0-1:
+    image: mongo:8.0
+    container_name: topology-rs3-search-rs0-1
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --port
+      - "27017"
+      - --setParameter
+      - searchIndexManagementHostAndPort=search-mongot:27028
+      - --setParameter
+      - mongotHost=search-mongot:27028
+      - --setParameter
+      - skipAuthenticationToSearchIndexManagementServer=false
+    ports:
+      - "${MONGO_HOST_PORT_1:-27017}:27017"
+    extra_hosts:
+      - "rs0-1.localhost:host-gateway"
+      - "rs0-2.localhost:host-gateway"
+      - "rs0-3.localhost:host-gateway"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-rs3-search-rs0-1"
+    volumes:
+      - rs3-search-data-1:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  rs0-2:
+    image: mongo:8.0
+    container_name: topology-rs3-search-rs0-2
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --port
+      - "27017"
+      - --setParameter
+      - searchIndexManagementHostAndPort=search-mongot:27028
+      - --setParameter
+      - mongotHost=search-mongot:27028
+      - --setParameter
+      - skipAuthenticationToSearchIndexManagementServer=false
+    ports:
+      - "${MONGO_HOST_PORT_2:-27018}:27017"
+    extra_hosts:
+      - "rs0-1.localhost:host-gateway"
+      - "rs0-2.localhost:host-gateway"
+      - "rs0-3.localhost:host-gateway"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-rs3-search-rs0-2"
+    volumes:
+      - rs3-search-data-2:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  rs0-3:
+    image: mongo:8.0
+    container_name: topology-rs3-search-rs0-3
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --port
+      - "27017"
+      - --setParameter
+      - searchIndexManagementHostAndPort=search-mongot:27028
+      - --setParameter
+      - mongotHost=search-mongot:27028
+      - --setParameter
+      - skipAuthenticationToSearchIndexManagementServer=false
+    ports:
+      - "${MONGO_HOST_PORT_3:-27019}:27017"
+    extra_hosts:
+      - "rs0-1.localhost:host-gateway"
+      - "rs0-2.localhost:host-gateway"
+      - "rs0-3.localhost:host-gateway"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-rs3-search-rs0-3"
+    volumes:
+      - rs3-search-data-3:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "27017", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+    restart: "no"
+
+  rs-init:
+    image: mongo:8.0
+    container_name: topology-rs3-search-rs-init
+    depends_on:
+      rs0-1:
+        condition: service_healthy
+      rs0-2:
+        condition: service_healthy
+      rs0-3:
+        condition: service_healthy
+    command:
+      - mongosh
+      - --host
+      - rs0-1
+      - --port
+      - "27017"
+      - --quiet
+      - --eval
+      - |
+        try {
+          rs.status();
+          print("RS already initialized");
+        } catch(e) {
+          rs.initiate({
+            _id: "rs0",
+            members: [
+              { _id: 0, host: "rs0-1.localhost:${MONGO_HOST_PORT_1:-27017}" },
+              { _id: 1, host: "rs0-2.localhost:${MONGO_HOST_PORT_2:-27018}" },
+              { _id: 2, host: "rs0-3.localhost:${MONGO_HOST_PORT_3:-27019}" }
+            ]
+          });
+          print("RS initialized");
+        }
+    restart: "no"
+
+  search-user-init:
+    image: mongo:8.0
+    container_name: topology-rs3-search-user-init
+    depends_on:
+      rs-init:
+        condition: service_completed_successfully
+    command:
+      - mongosh
+      - --host
+      - rs0-1
+      - --port
+      - "27017"
+      - --quiet
+      - --eval
+      - |
+        for (let i = 0; i < 30; i++) {
+          try {
+            const admin = db.getSiblingDB("admin");
+            const existing = admin.getUser("mongotUser");
+            if (!existing) {
+              admin.createUser({
+                user: "mongotUser",
+                pwd: "mongotPassword",
+                roles: [{ role: "searchCoordinator", db: "admin" }]
+              });
+              print("mongotUser created");
+            } else {
+              print("mongotUser already exists");
+            }
+            break;
+          } catch(e) {
+            print("Waiting for primary... " + e.message);
+            sleep(1000);
+          }
+        }
+    restart: "no"
+
+  search-mongot:
+    image: mongodb/mongodb-community-search:latest
+    container_name: topology-rs3-search-mongot
+    depends_on:
+      search-user-init:
+        condition: service_completed_successfully
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >
+        cp /mongot-community/pwfile /tmp/pwfile &&
+        chmod 600 /tmp/pwfile &&
+        sed 's|/mongot-community/pwfile|/tmp/pwfile|g' /mongot-community/config.default.yml > /tmp/mongot-config.yml &&
+        exec /mongot-community/mongot --config /tmp/mongot-config.yml
+    ports:
+      - "${MONGOT_HOST_PORT_1:-27028}:27028"
+    labels:
+      mongostage: "true"
+      mongostage-slug: "topology-rs3-search-mongot"
+    volumes:
+      - rs3-search-mongot-data:/data/mongot
+      - ./search-config/mongot-rs.conf:/mongot-community/config.default.yml:ro
+      - ./search-config/pwfile:/mongot-community/pwfile:ro
+    restart: "no"
+
+volumes:
+  rs3-search-data-1:
+  rs3-search-data-2:
+  rs3-search-data-3:
+  rs3-search-mongot-data:
