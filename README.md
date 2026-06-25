@@ -4,6 +4,12 @@
 
 **[View the web version here](https://timatmongodb.github.io/mongostage/)**
 
+**Disclaimer**
+
+This is an independent project and is **not an official MongoDB product**. It is intended for local development, demos, testing, and learning purposes only.
+
+**⚠️ Do not use this tool in production environments.**
+
 MongoDB-branded Docker environments for demos, workshops, and content creation. Comes with a full terminal UI and CLI for managing containers across Linux, macOS, and Windows (WSL2).
 
 ## Requirements
