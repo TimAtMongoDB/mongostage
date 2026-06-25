@@ -4,13 +4,17 @@
 
 **[View the web version here](https://timatmongodb.github.io/mongostage/)**
 
+---
+
 **Disclaimer**
 
 This is an independent project and is **not an official MongoDB product**. It is intended for local development, demos, testing, and learning purposes only.
 
 **⚠️ Do not use this tool in production environments.**
+---
 
-MongoDB-branded Docker environments for demos, workshops, and content creation. Comes with a full terminal UI and CLI for managing containers across Linux, macOS, and Windows (WSL2).
+
+**TL;DR** - `npm install -g mongostage` gives you a set of MongoDB-branded Docker containers for local dev, demos, and workshops. Run `mongostage` to open the TUI, pick an image (bare shell, Node, Python, or one with Claude Code or Grok pre-installed), and you're in a fully configured terminal environment in seconds across Linux, macOS, and Windows (WSL2). Docker will be installed automatically.
 
 ## Requirements
 
@@ -39,6 +43,16 @@ Running `mongostage` with no arguments opens an interactive terminal UI. Two pag
 
 - **Images** — Browse available images, filter by category (`← →`), search by typing, launch with `Enter`
 - **Containers** — View running and stopped containers, stop/start/remove/shell in from a menu
+
+![MongoStage TUI](https://raw.githubusercontent.com/TimAtMongoDB/mongostage/main/docs/screenshots/mongostage_tui.webp)
+
+---
+
+## The terminal environment
+
+Every container drops you into a branded MongoDB terminal with mongosh, the full shell tooling, and a Starship prompt pre-configured.
+
+![MongoStage terminal](https://raw.githubusercontent.com/TimAtMongoDB/mongostage/main/docs/screenshots/mongostage_terminal.webp)
 
 ---
 
@@ -110,6 +124,20 @@ mongostage env clear                               # remove all keys (prompts fi
 ```
 
 **Key format:** must match `/^[A-Z_][A-Z0-9_]*$/i` — letters, digits, underscores only. Values cannot contain newlines.
+
+---
+
+### `mongostage timezone`
+
+Set the timezone injected into all containers. Stored as `TZ` in `~/.mongostage/.env`.
+
+```bash
+mongostage timezone set America/New_York   # set a timezone
+mongostage timezone set UTC                # use UTC
+mongostage timezone show                   # show current setting
+```
+
+Accepts any IANA timezone name. Existing containers must be recreated (`mongostage connect --fresh`) to pick up the change.
 
 ---
 
